@@ -1,3 +1,19 @@
+# You have to download since the "Python\Python311\Lib\site-packages" many
+# different libraries named : zaber, zaber.serial-0.9.1.dist-info, zaber_motion,
+# zaber_motion_bindings_windows, zaber_motion_bindings_windows-3.1.1.dist-info,
+# zaber_motion-3.1.1.dist-info, tkinter, time, serial.tools.list_ports, serial.
+# You can also take this library since another computer and paste it in the
+# "site-packages" file.
+
+import tkinter.filedialog as filedialog
+import tkinter as tk
+import subprocess
+import zaber_motion
+import serial.tools.list_ports as list_ports
+import time
+
+
+
 from zaber_motion import Units, Library
 from zaber_motion.ascii import Connection, SettingConstants
 from zaber_motion.ascii import AlertEvent
@@ -9,12 +25,6 @@ from tkinter import ttk
 #from zaber_motion.ascii import Connection, SettingConstants
 from zaber_motion import ConnectionFailedException
 
-import tkinter.filedialog as filedialog
-import tkinter as tk
-import subprocess
-import zaber_motion
-import serial.tools.list_ports as list_ports
-
 
 with Connection.open_serial_port("COM8") as connection:
     connection.enable_alerts()
@@ -22,7 +32,12 @@ with Connection.open_serial_port("COM8") as connection:
     device_list = connection.detect_devices()
     print("Found {} devices".format(len(device_list)))
 
+
+
     device = device_list[0]
+    axis1 = device.get_axis(1)
+    axis2 = device.get_axis(2)
+
     
     class Interface:
         
@@ -39,19 +54,26 @@ with Connection.open_serial_port("COM8") as connection:
             self.num_COM = tk.StringVar()
             self.file_path = tk.StringVar()
             self.file_name = tk.StringVar()
-            self.number150 = tk.DoubleVar()
-            self.number50 = tk.DoubleVar()
             self.device = None
-    
-           
             
+            self.number50_str = tk.StringVar(value="")
+            self.number150_str = tk.StringVar(value="")
+            
+            self.number50_str = tk.StringVar(value=str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            self.number150_str = tk.StringVar(value=str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
+            
+    
+            print(f"\nPosition axe 1 : {self.number50_str.get()}")
+            print(f"\nPosition axe 2 : {self.number150_str.get()}")
+    
+    
             # First part the number com and the connection button
             tk.Label(master, text="COM NUMBER :").grid(row=0, column=0)
-            self.connect_button = ttk.Button(master, text="Connection")
-            self.connect_button.grid(column=5, row=0)
-            self.path_text = tk.Entry(self.master, textvariable="COM8", width=30)
+            #self.connect_button = ttk.Button(master, text="Connection")
+            #self.connect_button.grid(column=5, row=0)
+            self.path_text = tk.Label(master, text="COM8", width=5)
             self.path_text.grid(row=0, column=1, sticky="W", padx=5, columnspan=4)
-            self.disconnect_button = ttk.Button(master, text="Deconnection", command=self.deconnection)
+            self.disconnect_button = ttk.Button(master, text="Deconnection")
             self.disconnect_button.grid(column=6, row=0)
             
             # Second part the number devices found
@@ -72,7 +94,7 @@ with Connection.open_serial_port("COM8") as connection:
             # Fourth part the 150 mm engine
             
             tk.Label(master, text="Motorized linear stage 150mm ").grid(row=4, column=0)
-            tk.Label(master, textvariable=self.number150).grid(row=4, column=1)
+            tk.Label(master, textvariable=self.number150_str).grid(row=4, column=1)
             tk.Label(master, text="mm").grid(row=4, column=2)
            
             self.r3=ttk.Button(master, text="►", width=10).grid(column=7, row=4)
@@ -80,18 +102,18 @@ with Connection.open_serial_port("COM8") as connection:
             self.r5=ttk.Button(master, text="◄", width=10).grid(column=5, row=4)
             self.r6=ttk.Button(master, text="◄◄", width=10).grid(column=4, row=4)       
             self.r7=ttk.Button(master, text="Home", width=10).grid(column=9, row=4)  
-            self.r8=ttk.Button(master, text="█", width=10).grid(column=6, row=4)  
+            self.r8=ttk.Button(master, text="█", width=10, command=self.stop_all_axes()).grid(column=6, row=4)  
     
     
             # Fifth part the 50 mm engine
             
             tk.Label(master, text="Motorized linear stage 50mm ").grid(row=5, column=0)
-            tk.Label(master, textvariable=self.number50).grid(row=5, column=1)
+            tk.Label(master, textvariable=self.number50_str).grid(row=5, column=1)
             tk.Label(master, text="mm").grid(row=5, column=2)
             # exemple de bouton ttk.Button(frm, text="►", command=root.destroy).grid(column=1, row=3)
-            self.r9=ttk.Button(master, text="►", width=10).grid(column=7, row=5)
+            self.r9=ttk.Button(master, text="►", command=self.increase, width=10).grid(column=7, row=5)
             self.r10=ttk.Button(master, text="►►", command=self.mouvement, width=10).grid(column=8, row=5)
-            self.r11=ttk.Button(master, text="◄", width=10).grid(column=5, row=5)
+            self.r11=ttk.Button(master, text="◄", command=self.decrease, width=10).grid(column=5, row=5)
             self.r12=ttk.Button(master, text="◄◄", width=10).grid(column=4, row=5)       
             self.r13=ttk.Button(master, text="Home", width=10).grid(column=9, row=5)  
             self.r14=ttk.Button(master, text="█", width=10).grid(column=6, row=5) 
@@ -104,7 +126,7 @@ with Connection.open_serial_port("COM8") as connection:
             tk.Label(master, text="").grid(row=6)
             frame = tk.Frame(self.master, width=50, height=50, highlightbackground="black", highlightthickness=2)
             frame.grid(row=0, column=11, rowspan=7)
-            self.r15 = ttk.Button(frame, text="HOME", width=10).grid(column=0, row=0)
+            self.r15 = ttk.Button(frame, text="HOME", command=self.home, width=10).grid(column=0, row=0)
             self.r16 = ttk.Button(frame, text="█", command=self.stop_all_axes, width=10).grid(column=0, row=1)
             tk.Label(frame, text="").grid(column=1, row= 0)
             tk.Label(frame, text="Move to absolute position").grid(row=0, column=3)
@@ -128,10 +150,145 @@ with Connection.open_serial_port("COM8") as connection:
     
             tk.Label(master, text="").grid(row=7)
             frame = tk.Frame(master, height=2, bg='black').grid(row=8, columnspan=15, pady=10, sticky='we')
-            tk.Label(master, text="").grid(row=9)
+            
+            tk.Label(master, text="").grid(row=10)
+            
+            
     
-    
+            #self.r20=ttk.Button(frame, text="Hexagon", width=10).grid(column=0, row=9)
+            #self.r21=ttk.Button(frame, text="Circle", width=10).grid(column=0, row=10)   
+            #self.r22=ttk.Button(frame, text="Line", width=10).grid(column=0, row=11)
+            
+            tk.Label(master, text="How many loop : ").grid(row=9, column=0)
+            self.number_loop = ttk.Entry(frame, width=30)
+            self.number_loop.grid(row=9, column=1, sticky="W", padx=5)
+            self.r20 = ttk.Button(frame, text="ACCEPT", width=10, command=self.create_labels_and_entries)
+            self.r20.grid(column=2, row=9)
+            
+            
+            
+            
+            
+        def create_labels_and_entries(self):
+            # Récupérer le nombre de labels et d'entrys à créer
+            num_entries = int(self.number_loop.get())
+            
+            # Créer une nouvelle fenêtre
+            window = tk.Toplevel()
+            j=0
+            k=0
+            l=0
+            self.Sleeptime = {}
+            self.positionX = {}
+            self.positionY = {}
+            self.MovementTime = {}
+            # Créer les labels et les entrys
+            for i in range(num_entries):
+                if l>=3:
+                    l=0
+                    j=0
+                    label = ttk.Label(window, text="           ").grid(column=k+2)
+                    label = ttk.Label(window, text="           ").grid(column=k+3)
+                    k=k+4
+                l=l+1   
+        
+                label = ttk.Label(window, text=f"Loop {i+1}").grid(row=j, column=k)
+                label = ttk.Label(window, text=f"Sleep time (in s) :").grid(row=j+1, column=k)
+                self.Sleeptime[i+1] = ttk.Entry(window)
+                self.Sleeptime[i+1].grid(row=j+1, column=k+1)
+                label = ttk.Label(window, text=f"Position x {i+1} (in mm) :").grid(row=j+2, column=k)
+                self.positionX[i+1] = ttk.Entry(window)
+                self.positionX[i+1].grid(row=j+2, column=k+1)
+                label = ttk.Label(window, text=f"Position y {i+1} (in mm) :").grid(row=j+3, column=k)
+                self.positionY[i+1] = ttk.Entry(window)
+                self.positionY[i+1].grid(row=j+3, column=k+1)
+                label = ttk.Label(window, text=f"Movement time (in s) :").grid(row=j+4, column=k)
+                self.MovementTime[i+1] = ttk.Entry(window)
+                self.MovementTime[i+1].grid(row=j+4, column=k+1)
+                label = ttk.Label(window, text=" ").grid(row=j+5)
+                j=j+6
+            self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=10, command=self.MovePlate).grid(row=16)
+        
+        def MovePlate(self):
+            Movement=int(self.number_loop.get())
+            
+            for i in range(Movement):
+                self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+                self.number150_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
+                if self.Sleeptime[i+1].get()=="":
+                    SleepTimeNow = 1
+                    time.sleep(SleepTimeNow)
+                elif self.Sleeptime[i+1].get()!="":
+                    SleepTimeNow = float(self.Sleeptime[i+1].get())
+                    time.sleep(SleepTimeNow)
+                
+                if self.positionX[i+1].get() !="":
+                    PositionNowX = float(self.positionX[i+1].get())
+                elif self.positionX[i+1].get() =="":
+                    PositionNowX= axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    
+                if self.positionY[i+1].get() != "":
+                    PositionNowY = float(self.positionY[i+1].get())
+                elif self.positionY[i+1].get() =="":
+                    PositionNowY= axis2.get_position(Units.LENGTH_MILLIMETRES)
+                    
+                if self.MovementTime[i+1].get() == "":
+                    MovementTime = 4
+                elif self.MovementTime[i+1].get() != "":
+                    MovementTime = float(self.MovementTime[i+1].get())
+                
 
+                print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'")
+                print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
+                
+                
+                
+                velocity1=abs(abs(PositionNowX)-abs(axis1.get_position(Units.LENGTH_MILLIMETRES)))/MovementTime
+                axis1.move_absolute(PositionNowX, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+
+
+                velocity2=abs(abs(PositionNowY)-abs(axis2.get_position(Units.LENGTH_MILLIMETRES)))/MovementTime                    
+                axis2.move_absolute(PositionNowY, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity2, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+
+
+
+                number50 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                number150 = axis2.get_position(Units.LENGTH_MILLIMETRES)
+                self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+                self.number150_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
+
+            
+
+                print(f"\nPosition axe 1 :: '{number50}'")
+                print(f"\nPosition axe 2 :: '{number150}'")
+                
+            
+                
+        def home(self):
+            
+            axis1.move_absolute(0, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+            axis2.move_absolute(0, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+           
+            self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            self.number150_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))            
+            
+        def home1(self):
+            
+            axis1.move_absolute(0, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+      
+            self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            self.number150_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))    
+            
+        
+        def increase(self):
+            axis1.move_absolute(7, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+            self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            print(f"\nPosition axe 1 :: '{number50}'")
+        def decrease (self):
+            axis1.move_absolute(3, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+            self.number50_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            print(f"\nPosition axe 1 :: '{number50}'")
+        
         def mouvement(self):
             if self.LSQ1 is None:
                 print("LSQ1 is not connected")
@@ -156,6 +313,7 @@ with Connection.open_serial_port("COM8") as connection:
     
         def stop_all_axes(self):
             try:
+                device.all_axes.stop()
                 self.LSQ1.stop()
                 self.LSQ2.stop()
             except AttributeError:
@@ -164,6 +322,9 @@ with Connection.open_serial_port("COM8") as connection:
     
         def distance_axe(self):
                 position = axis.settings.get("encoder.pos")
+                
+        
+        
     
     
     # Démarrage de la boucle principale
