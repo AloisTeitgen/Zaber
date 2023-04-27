@@ -47,7 +47,7 @@ with Connection.open_serial_port("COM8") as connection:
         
         
         def __init__(self, master):
-            self.Check="true"
+            self.Check=1
             self.master = master
             master.title("My window")
             self.device_list = []
@@ -307,6 +307,7 @@ with Connection.open_serial_port("COM8") as connection:
             
         
         def increase(self, button_num):
+            self.Check=1
             number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
             number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
             self.number50_str.set(str(number50))
@@ -314,11 +315,14 @@ with Connection.open_serial_port("COM8") as connection:
             print(f"\nPosition axe 1 :: '{number150}'")
             print(f"\nPosition axe 2 :: '{number50}'")
             i=0
+            print(f"\nCheck : '{self.Check}'")
             if button_num == 1:
-                    random_number_step = random.uniform(0.001, 0.00999)
+                    random_number_step = random.uniform(0.001, 0.009999999999999)
                     for i in range(10):
                         i=i+1
-                        if self.Check=="true":
+                        self.master.update()
+                        if self.Check==1:
+                            print(f"\nCheck : '{self.Check}'")
                             number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
                             axis1.move_absolute(number150+random_number_step, unit=Units.LENGTH_MILLIMETRES, wait_until_idle=True, velocity=0, velocity_unit=Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration=0, acceleration_unit=Units.NATIVE)
                             time.sleep(0.5)
@@ -374,7 +378,7 @@ with Connection.open_serial_port("COM8") as connection:
     
         def stop_all_axis(self):
             try:
-                self.Check="false"
+                self.Check=2
                 axis1.stop(wait_until_idle = True)
                 axis2.stop(wait_until_idle = True)
             except AttributeError:
