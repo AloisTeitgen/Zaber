@@ -44,9 +44,10 @@ with Connection.open_serial_port("COM8") as connection:
         
         #axis.settings.get("encoder.pos")
         
+        
+        
         def __init__(self, master):
-            self.LSQ1 = NONE
-            self.LSQ2 = NONE
+            self.Check="true"
             self.master = master
             master.title("My window")
             self.device_list = []
@@ -61,8 +62,8 @@ with Connection.open_serial_port("COM8") as connection:
             self.number50_str = tk.StringVar(value="")
             self.number150_str = tk.StringVar(value="")
             
-            self.number150_str = tk.StringVar(value=str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
-            self.number50_str = tk.StringVar(value=str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
+            self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+            self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
             
             axis1.settings.set("limit.max", 140, Units.LENGTH_MILLIMETRES)
             axis2.settings.set("limit.max", 45, Units.LENGTH_MILLIMETRES)
@@ -106,7 +107,7 @@ with Connection.open_serial_port("COM8") as connection:
             self.r5=ttk.Button(master, text="◄", width=10).grid(column=5, row=4)
             self.r6=ttk.Button(master, text="◄◄", width=10).grid(column=4, row=4)       
             self.r7=ttk.Button(master, text="Home", width=10).grid(column=9, row=4)  
-            self.r8=ttk.Button(master, text="█", width=10, command=self.stop_all_axes()).grid(column=6, row=4)  
+            self.r8=ttk.Button(master, text="█", width=10, command=self.stop_all_axis()).grid(column=6, row=4)  
     
     
             # Fifth part the 50 mm engine
@@ -131,7 +132,7 @@ with Connection.open_serial_port("COM8") as connection:
             frame = tk.Frame(self.master, width=50, height=50, highlightbackground="black", highlightthickness=2)
             frame.grid(row=0, column=11, rowspan=7)
             self.r15 = ttk.Button(frame, text="HOME", command=self.home, width=10).grid(column=0, row=0)
-            self.r16 = ttk.Button(frame, text="█", command=self.stop_all_axes, width=10).grid(column=0, row=1)
+            self.r16 = ttk.Button(frame, text="█", command=self.stop_all_axis, width=10).grid(column=0, row=1)
             tk.Label(frame, text="").grid(column=1, row= 0)
             tk.Label(frame, text="Move to absolute position").grid(row=0, column=3)
             self.number_text = ttk.Entry(frame, width=30).grid(row=1, column=3, sticky="W", padx=5)
@@ -283,13 +284,10 @@ with Connection.open_serial_port("COM8") as connection:
 
                 number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
                 number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
-                self.number50_str.set(str(number50))
-                self.number150_str.set(str(number150))
-                #test(axis1, axis2, self.number50_str, self.number150_str)
                 print(f"\nPosition axe 1 :: '{number150}'")
                 print(f"\nPosition axe 2 :: '{number50}'")
                 
-                self.r20.update()
+                self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
                 
         def home(self):
@@ -315,18 +313,20 @@ with Connection.open_serial_port("COM8") as connection:
             self.number150_str.set(str(number150))  
             print(f"\nPosition axe 1 :: '{number150}'")
             print(f"\nPosition axe 2 :: '{number50}'")
-            
+            i=0
             if button_num == 1:
                     random_number_step = random.uniform(0.001, 0.00999)
                     for i in range(10):
-                        number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
-                        axis1.move_absolute(number150+random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                        #axis1.move_absolute(0, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                        time.sleep(0.5)
-                        number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
-                        number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)    
-                        print(f"\nPosition axe 1 :: '{number150}'")
-                        self.update_labels(number150, number50)
+                        i=i+1
+                        if self.Check=="true":
+                            number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                            axis1.move_absolute(number150+random_number_step, unit=Units.LENGTH_MILLIMETRES, wait_until_idle=True, velocity=0, velocity_unit=Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration=0, acceleration_unit=Units.NATIVE)
+                            time.sleep(0.5)
+                            self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
+                            self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
+                            self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                        else:
+                            self.stop_all_axis
             elif button_num == 2:
                 
                 axis2.move_max(wait_until_idle = True, velocity = 0, velocity_unit = Units.NATIVE, acceleration = 0, acceleration_unit = Units.NATIVE)
@@ -335,7 +335,7 @@ with Connection.open_serial_port("COM8") as connection:
             number150 = axis2.get_position(Units.LENGTH_MILLIMETRES)    
             print(f"\nPosition axe 1 :: '{number50}'")
             print(f"\nPosition axe 2 :: '{number150}'")
-            
+            self.Check="true"
             
         def decrease (self):
             #axis1.move_absolute(3, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
@@ -372,22 +372,19 @@ with Connection.open_serial_port("COM8") as connection:
             self.num_devices.set(num_devices)
             print("Found {} devices".format(num_devices))
     
-        def stop_all_axes(self):
+        def stop_all_axis(self):
             try:
-                device.all_axes.stop()
-                self.LSQ1.stop()
-                self.LSQ2.stop()
+                self.Check="false"
+                axis1.stop(wait_until_idle = True)
+                axis2.stop(wait_until_idle = True)
             except AttributeError:
                 # Axe non initialisé
-                pass
-    
-        def distance_axe(self):
-                position = axis.settings.get("encoder.pos")
-                
+                pass              
         
         def update_labels(self, new_number150, new_number50):
-                self.number150_str.set(str(new_number150))
-                self.number50_str.set(str(new_number50))
+            self.number150_str.set(str(new_number150))
+            self.number50_str.set(str(new_number50))
+            self.master.update()
     
     
     # Démarrage de la boucle principale
