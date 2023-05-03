@@ -64,7 +64,7 @@ with Connection.open_serial_port("COM8") as connection:
             
             self.Check=tk.StringVar(value="")
             self.Check=1
-            print(f"\nCheck : '{self.Check}'")
+            self.plate_values = []
             
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
@@ -217,12 +217,15 @@ with Connection.open_serial_port("COM8") as connection:
                 self.MovementTime[i+1].grid(row=j+4, column=k+1)
                 label = ttk.Label(window, text=" ").grid(row=j+5)
                 j=j+6
+
             self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=10, command=lambda: self.MovePlate(num_entries)).grid(row=20)
         
         def MovePlate(self, Movement):
+
             #Movement=num_entries
             print(f"\nnum_entries :: '{Movement}'")
             for i in range(Movement):
+                print(f"\n La valeur de i est :: '{i}'")
                 random_number_step = round(random.uniform(0.01, 0.09999), 3)
                 print(f"\nRandom_number_step :: '{random_number_step}'")
                 self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
@@ -232,6 +235,7 @@ with Connection.open_serial_port("COM8") as connection:
                 elif self.Sleeptime[i+1].get()!="":
                     SleepTimeNow = float(self.Sleeptime[i+1].get())
                     time.sleep(SleepTimeNow)
+                self.plate_values[i*4+1] = SleepTimeNow
                 
                 if self.positionAxis1.get() !="":
                     PositionNowAxis1 = float(self.positionAxis1.get())
@@ -239,20 +243,23 @@ with Connection.open_serial_port("COM8") as connection:
                         PositionNowAxis1=0.000000001
                 elif self.positionAxis1.get() =="":
                     PositionNowAxis1= axis1.get_position(Units.LENGTH_MILLIMETRES)
-                    
+                self.plate_values[i*4+2] = PositionNowAxis1    
+                
                 if self.positionAxis2.get() != "":
                     PositionNowAxis2 = float(self.positionAxis2.get())
                     if PositionNowAxis2==0:
                         PositionNowAxis2=0.000000001
                 elif self.positionY[i+1].get() =="":
                     PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
-                    
+                self.plate_values[i*4+3] = PositionNowAxis2   
+                
                 if self.MovementTime[i+1].get() == "":
                     MovementTime = 20/2
                 elif self.MovementTime[i+1].get() != "":
                     MovementTime = float(self.MovementTime[i+1].get())/2
+                self.plate_values[i*4+4] = MovementTime
 
-                
+                print(self.plate_values)
 
                 print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'")
                 print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
