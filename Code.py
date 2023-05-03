@@ -228,48 +228,42 @@ with Connection.open_serial_port("COM8") as connection:
                 self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
                 self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
                 if self.Sleeptime[i+1].get()=="":
-                    self.SleepTimeNow = 1
+                    SleepTimeNow = 1
                 elif self.Sleeptime[i+1].get()!="":
-                    self.SleepTimeNow = float(self.Sleeptime[i+1].get())
-                
-                if self.MovementTime[i+1].get() == "":
-                    self.MovementTime = 14/2
-                elif self.MovementTime[i+1].get() != "":
-                    self.MovementTime = float(self.MovementTime[i+1].get())/2
+                    SleepTimeNow = float(self.Sleeptime[i+1].get())
                 
                 if self.positionAxis2_[i+1].get() != "":
-                    self.PositionNowAxis2 = float(self.positionAxis2_[i+1].get())
-                    if self.PositionNowAxis2==0:
-                        self.PositionNowAxis2=0.00001
+                    PositionNowAxis2 = float(self.positionAxis2_[i+1].get())
+                    if PositionNowAxis2==0:
+                        PositionNowAxis2=0.00001
                 elif self.positionAxis2_[i+1].get() =="":
-                    self.PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
+                    PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
                 
                 
                 
                 if self.positionAxis1_[i+1].get() !="":
-                    self.PositionNowAxis1 = float(self.positionAxis1_[i+1].get())
-                    if self.PositionNowAxis1==0:
-                        self.PositionNowAxis1=0.00001
-                    self.TimeByStep=(abs(random_number_step)*self.MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - self.PositionNowAxis1)+1)         
-                    self.velocity0= random_number_step/self.TimeByStep
-                    self.OldPositionX = axis1.get_position(Units.LENGTH_MILLIMETRES) 
-                    self.OldPositionY = axis2.get_position(Units.LENGTH_MILLIMETRES) 
-                    self.quotient, remainder = divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+1), random_number_step)
-                    self.integer_part = self.quotient-1
-                    self.decimal_part = remainder / random_number_step
-                    self.random_number_step = (abs(self.PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient  
+                    PositionNowAxis1 = float(self.positionAxis1_[i+1].get())
+                    if PositionNowAxis1==0:
+                        PositionNowAxis1=0.00001
+                    
+                    
+                    
+                    
+                    
                 elif self.positionAxis1_[i+1].get() =="":
-                    self.PositionNowAxis1= axis1.get_position(Units.LENGTH_MILLIMETRES)
-                    self.TimeByStep=(abs(random_number_step)*self.MovementTime)/(abs(axis2.get_position(Units.LENGTH_MILLIMETRES) - self.PositionNowAxis2)+1)         
-                    self.velocity0= random_number_step/self.TimeByStep
-                    self.OldPositionX = axis1.get_position(Units.LENGTH_MILLIMETRES) 
-                    self.OldPositionY = axis2.get_position(Units.LENGTH_MILLIMETRES) 
-                    self.quotient, remainder = divmod(abs(self.PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)+1), random_number_step)
-                    self.integer_part = self.quotient-1
-                    self.decimal_part = remainder / random_number_step
-                    self.random_number_step = (abs(self.PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/self.quotient 
+                    PositionNowAxis1= axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    
                     
             
+            
+            
+                    
+                if self.MovementTime[i+1].get() == "":
+                    MovementTime = 20/2
+                    if abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5:
+                        MovementTime = 6/2
+                elif self.MovementTime[i+1].get() != "":
+                    MovementTime = float(self.MovementTime[i+1].get())/2
 
                 
 
@@ -277,47 +271,54 @@ with Connection.open_serial_port("COM8") as connection:
                 print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
                
                 
-               
+                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - PositionNowAxis1)+1)         
+                velocity0= random_number_step/TimeByStep
+                OldPositionX = axis1.get_position(Units.LENGTH_MILLIMETRES) 
+                OldPositionY = axis2.get_position(Units.LENGTH_MILLIMETRES) 
+                quotient, remainder = divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+1), random_number_step)
+                integer_part = quotient-1
+                decimal_part = remainder / random_number_step
+                random_number_step2 = (abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient   
                 
                 
                 
-                time.sleep(self.SleepTimeNow)
-                if abs(self.OldPositionX - self.PositionNowAxis1) > 0.01 or abs(self.OldPositionY - self.PositionNowAxis2) > 0.01:
+                time.sleep(SleepTimeNow)
+                if abs(OldPositionX - PositionNowAxis1) > 0.01 or abs(OldPositionY - PositionNowAxis2) > 0.01:
                     
 
                     
-                    
+                    print(f"\n integer_part :: '{integer_part}'")
                     i=0
                     
-                    if abs(self.OldPositionX - self.PositionNowAxis1) >= 0.01 and abs(self.OldPositionY - self.PositionNowAxis2) >= 0.01:
-                        if self.OldPositionX < self.PositionNowAxis1 and self.OldPositionY < self.PositionNowAxis2 :
+                    if abs(OldPositionX - PositionNowAxis1) >= 0.01 and abs(OldPositionY - PositionNowAxis2) >= 0.01:
+                        if OldPositionX < PositionNowAxis1 and OldPositionY < PositionNowAxis2 :
                             #à envoyer : MovementTime, integer_part,decimal_part, random_number_step, la velocité nommé velocity0, ConfigureNumber (dans quel "if" on est), 
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 1)
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 1)
                           
-                        elif self.OldPositionX > self.PositionNowAxis1 and self.OldPositionY < self.PositionNowAxis2 :
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 2)
-                        elif self.OldPositionX < self.PositionNowAxis1 and self.OldPositionY > self.PositionNowAxis2 :
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 3)
-                        elif self.OldPositionX > self.PositionNowAxis1 and self.OldPositionY > self.PositionNowAxis2 :    
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 4)
+                        elif OldPositionX > PositionNowAxis1 and OldPositionY < PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 2)
+                        elif OldPositionX < PositionNowAxis1 and OldPositionY > PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 3)
+                        elif OldPositionX > PositionNowAxis1 and OldPositionY > PositionNowAxis2 :    
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 4)
                             
                           
                         
-                    elif abs(self.OldPositionX - self.PositionNowAxis1) >= 0.01 and abs(self.OldPositionY - self.PositionNowAxis2) <= 0.01:
-                        if self.OldPositionX < self.PositionNowAxis1 :
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 5)
+                    elif abs(OldPositionX - PositionNowAxis1) >= 0.01 and abs(OldPositionY - PositionNowAxis2) <= 0.01:
+                        if OldPositionX < PositionNowAxis1 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 5)
                           
-                        elif self.OldPositionX > self.PositionNowAxis1 :
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 6)
+                        elif OldPositionX > PositionNowAxis1 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 6)
                         
                         
                         
-                    elif abs(self.OldPositionX - self.PositionNowAxis1) <= 0.01 and abs(self.OldPositionY - self.PositionNowAxis2) >= 0.01:
-                        if self.OldPositionX < self.PositionNowAxis2 :
-                            self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 7)
+                    elif abs(OldPositionX - PositionNowAxis1) <= 0.01 and abs(OldPositionY - PositionNowAxis2) >= 0.01:
+                        if OldPositionX < PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 7)
                           
-                        elif self.OldPositionX > self.PositionNowAxis2 :
-                           self.mouvement_Move_Plate(self.MovementTime, self.integer_part, self.decimal_part, self.random_number_step, self.PositionNowAxis1, self.PositionNowAxis2, self.velocity0, 8)
+                        elif OldPositionX > PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 8)
                         
                         
                         
@@ -329,7 +330,7 @@ with Connection.open_serial_port("COM8") as connection:
                 
         
                 
-        def mouvement_Move_Plate (self, MovementTime, integer_part, decimal_part, random_number_step, PositionNowAxis1, PositionNowAxis2, velocity0, ConfigureNumber):
+        def mouvement_Move_Plate (self, MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, ConfigureNumber):
                   
             if ConfigureNumber == 1:
                 i=0
