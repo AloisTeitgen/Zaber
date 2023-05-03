@@ -64,7 +64,7 @@ with Connection.open_serial_port("COM8") as connection:
             
             self.Check=tk.StringVar(value="")
             self.Check=1
-            self.plate_values = [""] * 40
+            print(f"\nCheck : '{self.Check}'")
             
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
@@ -82,7 +82,7 @@ with Connection.open_serial_port("COM8") as connection:
             #self.connect_button.grid(column=5, row=0)
             self.path_text = tk.Label(master, text="COM8", width=5)
             self.path_text.grid(row=0, column=1, sticky="W", padx=5, columnspan=4)
-            self.disconnect_button = ttk.Button(master, text="Deconnection")
+            self.disconnect_button = ttk.Button(master, text="Play", command=self.Check1to2)
             self.disconnect_button.grid(column=6, row=0)
             
             # Second part the number devices found
@@ -188,8 +188,8 @@ with Connection.open_serial_port("COM8") as connection:
             k=0
             l=0
             self.Sleeptime = {}
-            self.positionX = {}
-            self.positionY = {}
+            self.positionAxis1_ = {}
+            self.positionAxis2_ = {}
             self.MovementTime = {}
             # Créer les labels et les entrys
             Move=num_entries
@@ -203,66 +203,26 @@ with Connection.open_serial_port("COM8") as connection:
                 l=l+1   
         
                 label = ttk.Label(window, text=f"Loop {i+1}").grid(row=j, column=k)
-                
-                label = ttk.Label(window, text="Sleep time (in s) :").grid(row=j+1, column=k)
+                label = ttk.Label(window, text=f"Sleep time (in s) :").grid(row=j+1, column=k)
                 self.Sleeptime[i+1] = ttk.Entry(window)
                 self.Sleeptime[i+1].grid(row=j+1, column=k+1)
-                if self.Sleeptime[i+1].get() != '':
-                    self.plate_values.append(float(str(self.Sleeptime[i+1])))
-                else:
-                    SleepTimeNow = 1
-                    self.plate_values.append(float(str(SleepTimeNow)))
-        
-        
-                label = ttk.Label(window, text=f"Position x {i+1} (in mm) :").grid(row=j+2, column=k)
-                self.positionAxis1[i+1] = ttk.Entry(window)
-                self.positionAxis1[i+1].grid(row=j+2, column=k+1)
-                if self.positionAxis1[i+1].get() != '':
-                    if self.positionAxis1[i+1]==0:
-                        self.positionAxis1[i+1]=0.000000001
-                    self.plate_values.append(float(str(self.positionAxis1[i+1])))
-                else:    
-                    self.plate_values.append(float(str(axis1.get_position(Units.LENGTH_MILLIMETRES))))
-        
-        
-                label = ttk.Label(window, text=f"Position y {i+1} (in mm) :").grid(row=j+3, column=k)
-                self.positionAxis2[i+1] = ttk.Entry(window)
-                self.positionAxis2[i+1].grid(row=j+3, column=k+1)
-                
-                if self.positionAxis2[i+1].get() != '':
-                    if self.positionAxis2[i+1]==0:
-                        self.positionAxis2[i+1]=0.000000001
-                    self.plate_values.append(float(str(self.positionAxis2[i+1])))
-                else:    
-                    self.plate_values.append(float(str(axis2.get_position(Units.LENGTH_MILLIMETRES))))
-                
-                
-        
-                label = ttk.Label(window, text="Movement time (in s) :").grid(row=j+4, column=k)
+                label = ttk.Label(window, text=f"Position Axis1 {i+1} (in mm) :").grid(row=j+2, column=k)
+                self.positionAxis1_[i+1] = ttk.Entry(window)
+                self.positionAxis1_[i+1].grid(row=j+2, column=k+1)
+                label = ttk.Label(window, text=f"Position Axis2 {i+1} (in mm) :").grid(row=j+3, column=k)
+                self.positionAxis2_[i+1] = ttk.Entry(window)
+                self.positionAxis2_[i+1].grid(row=j+3, column=k+1)
+                label = ttk.Label(window, text=f"Movement time (in s) :").grid(row=j+4, column=k)
                 self.MovementTime[i+1] = ttk.Entry(window)
                 self.MovementTime[i+1].grid(row=j+4, column=k+1)
-                
-                if self.MovementTime[i+1].get() == "":
-                    MovementTime = 20/2
-                    self.plate_values.append(float(str(MovementTime)))
-                elif self.MovementTime[i+1].get() != "":
-                    MovementTime = float(self.MovementTime[i+1].get)/2
-                    self.plate_values.append(float(str(MovementTime)))
-                    
-                    
                 label = ttk.Label(window, text=" ").grid(row=j+5)
                 j=j+6
-                
-            print(self.plate_values)    
-
             self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=10, command=lambda: self.MovePlate(num_entries)).grid(row=20)
         
         def MovePlate(self, Movement):
-
             #Movement=num_entries
             print(f"\nnum_entries :: '{Movement}'")
             for i in range(Movement):
-                print(f"\n La valeur de i est :: '{i}'")
                 random_number_step = round(random.uniform(0.01, 0.09999), 3)
                 print(f"\nRandom_number_step :: '{random_number_step}'")
                 self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
@@ -271,42 +231,35 @@ with Connection.open_serial_port("COM8") as connection:
                     SleepTimeNow = 1
                 elif self.Sleeptime[i+1].get()!="":
                     SleepTimeNow = float(self.Sleeptime[i+1].get())
-                    time.sleep(SleepTimeNow)
                 
-                
-                if self.positionAxis1.get() !="":
-                    PositionNowAxis1 = float(self.positionAxis1.get())
+                if self.positionAxis1_[i+1].get() !="":
+                    PositionNowAxis1 = float(self.positionAxis1_[i+1].get())
                     if PositionNowAxis1==0:
-                        PositionNowAxis1=0.000000001
-                elif self.positionAxis1.get() =="":
+                        PositionNowAxis1=0.00001
+                elif self.positionAxis1_[i+1].get() =="":
                     PositionNowAxis1= axis1.get_position(Units.LENGTH_MILLIMETRES)
-                
-                
-                if self.positionAxis2.get() != "":
-                    PositionNowAxis2 = float(self.positionAxis2.get())
+                    
+                if self.positionAxis2_[i+1].get() != "":
+                    PositionNowAxis2 = float(self.positionAxis2_[i+1].get())
                     if PositionNowAxis2==0:
-                        PositionNowAxis2=0.000000001
-                elif self.positionY[i+1].get() =="":
+                        PositionNowAxis2=0.00001
+                elif self.positionAxis2_[i+1].get() =="":
                     PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
-                
-                
+                    
                 if self.MovementTime[i+1].get() == "":
                     MovementTime = 20/2
+                    if abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5:
+                        MovementTime = 6/2
                 elif self.MovementTime[i+1].get() != "":
                     MovementTime = float(self.MovementTime[i+1].get())/2
-                
-                
 
-
-                print(self.plate_values)
+                
 
                 print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'")
                 print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
                 
-                #velocity1=abs(abs(PositionNowAxis1)-abs(axis1.get_position(Units.LENGTH_MILLIMETRES)))/MovementTime
-                #velocity2=abs(abs(PositionNowAxis2)-abs(axis2.get_position(Units.LENGTH_MILLIMETRES)))/MovementTime 
 
-                TimeByStep=(abs(random_number_step)*MovementTime)/abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - PositionNowAxis1)         
+                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - PositionNowAxis1)+1)         
                 
                 velocity0= random_number_step/TimeByStep
                 
@@ -316,116 +269,156 @@ with Connection.open_serial_port("COM8") as connection:
                 time.sleep(SleepTimeNow)
                 if abs(OldPositionX - PositionNowAxis1) > 0.01 or abs(OldPositionY - PositionNowAxis2) > 0.01:
                     
-                    quotient, remainder = divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)), random_number_step)
+                    quotient, remainder = divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+1), random_number_step)
 
                     integer_part = quotient-1
                     decimal_part = remainder / random_number_step
+                    
+                    random_number_step2 = (abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient
+                    
+                    print(f"\n integer_part :: '{integer_part}'")
                     i=0
-                    print(f"\nInteger :: '{integer_part}'")
                     
                     if abs(OldPositionX - PositionNowAxis1) >= 0.01 and abs(OldPositionY - PositionNowAxis2) >= 0.01:
-                        print("\n test")
                         if OldPositionX < PositionNowAxis1 and OldPositionY < PositionNowAxis2 :
-                            print("\n test2")
-                            print(f"\n position axis 1: '{PositionNowAxis1}'")
                             #à envoyer : MovementTime, integer_part,decimal_part, random_number_step, la velocité nommé velocity0, ConfigureNumber (dans quel "if" on est), 
-                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, PositionNowAxis1, velocity0, 1)
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 1)
                           
                         elif OldPositionX > PositionNowAxis1 and OldPositionY < PositionNowAxis2 :
-                            x=0
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 2)
                         elif OldPositionX < PositionNowAxis1 and OldPositionY > PositionNowAxis2 :
-                            x=0
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 3)
                         elif OldPositionX > PositionNowAxis1 and OldPositionY > PositionNowAxis2 :    
-                            x=0
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 4)
                             
                           
                         
                     elif abs(OldPositionX - PositionNowAxis1) >= 0.01 and abs(OldPositionY - PositionNowAxis2) <= 0.01:
-                        x=0
+                        if OldPositionX < PositionNowAxis1 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 5)
+                          
+                        elif OldPositionX > PositionNowAxis1 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 6)
+                        
                         
                         
                     elif abs(OldPositionX - PositionNowAxis1) <= 0.01 and abs(OldPositionY - PositionNowAxis2) >= 0.01:
-                        x=0
+                        if OldPositionX < PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 7)
+                          
+                        elif OldPositionX > PositionNowAxis2 :
+                            self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 8)
                         
                         
                         
-                        
-                        '''                 
-                        
-                        
-                    #while x < y and z > 0 or x < 5:
-                    #while i<=integer_part or self.Check == 1:
-                        
-                        
-                        #axis1.move_absolute(axis1.get_position(Units.LENGTH_MILLIMETRES)+random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                        
-                        #i=i+1
-                        
-                        
-                        
-                    
-                    if OldPositionX < PositionNowAxis1 + 0.001 or OldPositionX < PositionNowAxis1 - 0.001 :
-                    
-                        x=0
-                    
-                    
-                    
-                if PositionNowAxis1 > OldPositionX  and PositionNowAxis2 > OldPositionY:
-                    if PositionNowAxis1 > OldPositionX:
-                        axis1.move_absolute(PositionNowAxis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                    
-                    MovementTime = 10/2
-                    
-                    
-                elif self.MovementTime[i+1].get() != "":
-                    MovementTime = 10/2
-                elif self.MovementTime[i+1].get() == "":
-                    MovementTime = 10/2
-                elif self.MovementTime[i+1].get() != "":
-                    MovementTime = 10/2
-
-                
-                axis1.move_absolute(PositionNowAxis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-
-
-                
-                axis2.move_absolute(PositionNowAxis2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity2, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-'''
                 number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
                 number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
-                print(f"\nPosition axe 1 :: '{number150}'")
-                print(f"\nPosition axe 2 :: '{number50}'")
+                #print(f"\nPosition axe 1 :: '{number150}'")
+                #print(f"\nPosition axe 2 :: '{number50}'")
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
         
                 
-        def mouvement_Move_Plate (self, MovementTime, integer_part, decimal_part, random_number_step, PositionNowAxis1, velocity0, ConfigureNumber):
+        def mouvement_Move_Plate (self, MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, ConfigureNumber):
                   
             if ConfigureNumber == 1:
                 i=0
-                print(f"\n integer part: '{integer_part}'")
-                print(f"\n random_number_step: '{random_number_step}'")
                 while i<integer_part and self.Check == 1:
-                    
-                    #axis1.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
                     axis1.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                    axis2.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                    #axis2.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    axis2.move_relative(random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
                     i=i+1
-
                     self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    axis2.move_relative(random_number_step2*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                 if self.Check == 2:
-                    self.stop_all_axis
-                axis1.move_relative(random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                axis2.move_relative(random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                print(f"\ni: '{i}'")        
+                    self.stop_all_axis 
                     
             elif ConfigureNumber == 2:
-                x=0
+                i=0
+                while i<integer_part and self.Check == 1:
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    axis1.move_relative(-random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    axis2.move_relative(random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(-random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
             elif ConfigureNumber == 3:
-                x=0
+                i=0
+                while i<integer_part and self.Check == 1:
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    axis1.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    axis2.move_relative(-random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
+            elif ConfigureNumber == 4:
+                i=0
+                while i<integer_part and self.Check == 1:
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    axis1.move_relative(-random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    axis2.move_relative(-random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(-random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
+            elif ConfigureNumber == 5:
+                i=0
+                while i<integer_part and self.Check == 1:
+                    axis1.move_relative(random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
+            elif ConfigureNumber == 6:
+                i=0
+                while i<integer_part and self.Check == 1:
+                    axis1.move_relative(-random_number_step, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check==1:    
+                    axis1.move_relative(-random_number_step*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = velocity0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                if self.Check == 2:
+                    self.stop_all_axis 
             
-            
+            elif ConfigureNumber == 7:
+                i=0
+                while i<integer_part and self.Check == 1:
+                    axis2.move_relative(random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)                    
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
+            elif ConfigureNumber == 8:
+                i=0
+                while i<integer_part and self.Check == 1:
+                    axis2.move_relative(-random_number_step2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=velocity0/3, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)                    
+                    i=i+1
+                    self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                if self.Check == 2:
+                    self.stop_all_axis 
+                    
+                    
         
         def home(self):
             axis1.move_absolute(0, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
@@ -480,6 +473,7 @@ with Connection.open_serial_port("COM8") as connection:
             number150 = axis2.get_position(Units.LENGTH_MILLIMETRES)    
             print(f"\nPosition axe 1 :: '{number50}'")
             print(f"\nPosition axe 2 :: '{number150}'")
+            
         def decrease (self):
             #axis1.move_absolute(3, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
             i=0
@@ -518,11 +512,14 @@ with Connection.open_serial_port("COM8") as connection:
         def stop_all_axis(self):
             try:
                 if self.Check==1:
+                    device.all_axes.stop()
+                    self.master.update()
+                    print(f"\nStop : '{self.Check}'")
                     self.Check=2
                     self.master.update()
                     print(f"\nStop : '{self.Check}'")
                 if self.Check==2:
-                    self.Check=1
+                    device.all_axes.stop()
             except AttributeError:
                 # Axe non initialisé
                 pass              
@@ -532,7 +529,9 @@ with Connection.open_serial_port("COM8") as connection:
             self.number50_str.set(str(new_number50))
             self.master.update()
     
-    
+        def Check1to2(self):
+            self.Check = 1
+            print(f"\n Check : '{self.Check}'")
     # Démarrage de la boucle principale
     root = tk.Tk()
     interface = Interface(root)
