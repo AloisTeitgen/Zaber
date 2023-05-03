@@ -259,11 +259,11 @@ with Connection.open_serial_port("COM8") as connection:
             
                     
                 if self.MovementTime[i+1].get() == "":
-                    MovementTime = 20/2
+                    self.MovementTime = 20/2
                     if abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5:
-                        MovementTime = 6/2
+                        self.MovementTime = 6/2
                 elif self.MovementTime[i+1].get() != "":
-                    MovementTime = float(self.MovementTime[i+1].get())/2
+                    self.MovementTime = float(self.MovementTime[i+1].get())/2
 
                 
 
