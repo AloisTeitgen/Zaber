@@ -203,20 +203,57 @@ with Connection.open_serial_port("COM8") as connection:
                 l=l+1   
         
                 label = ttk.Label(window, text=f"Loop {i+1}").grid(row=j, column=k)
-                label = ttk.Label(window, text=f"Sleep time (in s) :").grid(row=j+1, column=k)
+                
+                label = ttk.Label(window, text="Sleep time (in s) :").grid(row=j+1, column=k)
                 self.Sleeptime[i+1] = ttk.Entry(window)
                 self.Sleeptime[i+1].grid(row=j+1, column=k+1)
+                if self.Sleeptime[i+1].get() != '':
+                    self.plate_values.append(float(self.Sleeptime[i+1].get()))
+                else:
+                    SleepTimeNow = 1
+                    self.plate_values.append(float(SleepTimeNow.get()))
+        
+        
                 label = ttk.Label(window, text=f"Position x {i+1} (in mm) :").grid(row=j+2, column=k)
-                self.positionAxis1 = ttk.Entry(window)
-                self.positionAxis1.grid(row=j+2, column=k+1)
+                self.positionAxis1[i+1] = ttk.Entry(window)
+                self.positionAxis1[i+1].grid(row=j+2, column=k+1)
+                if self.positionAxis1[i+1].get() != '':
+                    if self.positionAxis1[i+1]==0:
+                        self.positionAxis1[i+1]=0.000000001
+                    self.plate_values.append(float(self.positionAxis1[i+1].get()))
+                else:    
+                    self.plate_values.append(float(axis1.get_position(Units.LENGTH_MILLIMETRES).get()))
+        
+        
                 label = ttk.Label(window, text=f"Position y {i+1} (in mm) :").grid(row=j+3, column=k)
-                self.positionAxis2 = ttk.Entry(window)
-                self.positionAxis2.grid(row=j+3, column=k+1)
-                label = ttk.Label(window, text=f"Movement time (in s) :").grid(row=j+4, column=k)
+                self.positionAxis2[i+1] = ttk.Entry(window)
+                self.positionAxis2[i+1].grid(row=j+3, column=k+1)
+                
+                if self.positionAxis2[i+1].get() != '':
+                    if self.positionAxis2[i+1]==0:
+                        self.positionAxis2[i+1]=0.000000001
+                    self.plate_values.append(float(self.positionAxis2[i+1].get()))
+                else:    
+                    self.plate_values.append(float(axis2.get_position(Units.LENGTH_MILLIMETRES).get()))
+                
+                
+        
+                label = ttk.Label(window, text="Movement time (in s) :").grid(row=j+4, column=k)
                 self.MovementTime[i+1] = ttk.Entry(window)
                 self.MovementTime[i+1].grid(row=j+4, column=k+1)
+                
+                if self.MovementTime[i+1].get() == "":
+                    MovementTime = 20/2
+                    self.plate_values.append(float(MovementTime.get()))
+                elif self.MovementTime[i+1].get() != "":
+                    MovementTime = float(self.MovementTime[i+1].get())/2
+                    self.plate_values.append(float(MovementTime.get()))
+                    
+                    
                 label = ttk.Label(window, text=" ").grid(row=j+5)
                 j=j+6
+                
+            print(self.plate_values)    
 
             self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=10, command=lambda: self.MovePlate(num_entries)).grid(row=20)
         
@@ -235,7 +272,7 @@ with Connection.open_serial_port("COM8") as connection:
                 elif self.Sleeptime[i+1].get()!="":
                     SleepTimeNow = float(self.Sleeptime[i+1].get())
                     time.sleep(SleepTimeNow)
-                self.plate_values[i*4+1] = SleepTimeNow
+                
                 
                 if self.positionAxis1.get() !="":
                     PositionNowAxis1 = float(self.positionAxis1.get())
@@ -243,7 +280,7 @@ with Connection.open_serial_port("COM8") as connection:
                         PositionNowAxis1=0.000000001
                 elif self.positionAxis1.get() =="":
                     PositionNowAxis1= axis1.get_position(Units.LENGTH_MILLIMETRES)
-                self.plate_values[i*4+2] = PositionNowAxis1    
+                
                 
                 if self.positionAxis2.get() != "":
                     PositionNowAxis2 = float(self.positionAxis2.get())
@@ -251,13 +288,15 @@ with Connection.open_serial_port("COM8") as connection:
                         PositionNowAxis2=0.000000001
                 elif self.positionY[i+1].get() =="":
                     PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
-                self.plate_values[i*4+3] = PositionNowAxis2   
+                
                 
                 if self.MovementTime[i+1].get() == "":
                     MovementTime = 20/2
                 elif self.MovementTime[i+1].get() != "":
                     MovementTime = float(self.MovementTime[i+1].get())/2
-                self.plate_values[i*4+4] = MovementTime
+                
+                
+
 
                 print(self.plate_values)
 
