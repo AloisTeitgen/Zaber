@@ -64,7 +64,7 @@ with Connection.open_serial_port("COM8") as connection:
             
             self.Check=tk.StringVar(value="")
             self.Check=1
-            self.plate_values = []
+            self.plate_values = [""] * 40
             
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
