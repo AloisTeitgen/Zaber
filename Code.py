@@ -14,6 +14,7 @@ import time
 import random
 
 
+
 from zaber_motion import Units, Library
 from zaber_motion.ascii import Connection, SettingConstants
 from zaber_motion.ascii import AlertEvent
@@ -69,8 +70,12 @@ with Connection.open_serial_port("COM8") as connection:
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
             
-            axis1.settings.set("limit.max", 140, Units.LENGTH_MILLIMETRES)
-            axis2.settings.set("limit.max", 45, Units.LENGTH_MILLIMETRES)
+            self.Limit_MaxAxis1=60
+            self.Limit_MaxAxis2=40
+            
+            axis1.settings.set("limit.max", 60, Units.LENGTH_MILLIMETRES)
+            #axis1.settings.set("limit.max", 140, Units.LENGTH_MILLIMETRES)
+            axis2.settings.set("limit.max", 40, Units.LENGTH_MILLIMETRES)
     
             print(f"\nPosition axe 1 : {self.number150_str.get()}")
             print(f"\nPosition axe 2 : {self.number50_str.get()}")
@@ -106,12 +111,14 @@ with Connection.open_serial_port("COM8") as connection:
             tk.Label(master, textvariable=self.number150_str).grid(row=4, column=1)
             tk.Label(master, text="mm").grid(row=4, column=2)
            
-            self.r3=ttk.Button(master, text="►",command=lambda:self.increase(1), width=10).grid(column=7, row=4)
-            self.r4=ttk.Button(master, text="►►", width=10).grid(column=8, row=4)
-            self.r5=ttk.Button(master, text="◄", width=10).grid(column=5, row=4)
-            self.r6=ttk.Button(master, text="◄◄", width=10).grid(column=4, row=4)       
-            self.r7=ttk.Button(master, text="Home", command=lambda:self.home1(1), width=10).grid(column=9, row=4)  
-            self.r8=ttk.Button(master, text="█", command=self.stop_all_axis, width=10).grid(column=6, row=4)  
+            self.r3=ttk.Button(master, text="►", command=lambda:self.increase(1), width=10).grid(column=8, row=4)
+            self.r4=ttk.Button(master, text="►►", width=10).grid(column=9, row=4)
+            self.r10=ttk.Button(master, text="►|", command=self.increase(3), width=10).grid(column=10, row=4)
+            self.r5=ttk.Button(master, text="◄", command=lambda:self.decrease(1), width=10).grid(column=6, row=4)
+            self.r6=ttk.Button(master, text="◄◄", width=10).grid(column=5, row=4)     
+            self.r10=ttk.Button(master, text="|◄", command=self.mouvement, width=10).grid(column=4, row=4)
+            self.r7=ttk.Button(master, text="Home", command=lambda:self.home1(1), width=10).grid(column=11, row=4)  
+            self.r8=ttk.Button(master, text="█", command=self.stop_all_axis, width=10).grid(column=7, row=4)  
     
     
             # Fifth part the 50 mm engine
@@ -120,18 +127,20 @@ with Connection.open_serial_port("COM8") as connection:
             tk.Label(master, textvariable=self.number50_str).grid(row=5, column=1)
             tk.Label(master, text="mm").grid(row=5, column=2)
             # exemple de bouton ttk.Button(frm, text="►", command=root.destroy).grid(column=1, row=3)
-            self.r9=ttk.Button(master, text="►", command=lambda:self.increase(2), width=10).grid(column=7, row=5)
-            self.r10=ttk.Button(master, text="►►", command=self.mouvement, width=10).grid(column=8, row=5)
-            self.r11=ttk.Button(master, text="◄", command=self.decrease, width=10).grid(column=5, row=5)
-            self.r12=ttk.Button(master, text="◄◄", width=10).grid(column=4, row=5)       
-            self.r13=ttk.Button(master, text="Home", command=lambda:self.home1(2), width=10).grid(column=9, row=5)  
-            self.r14=ttk.Button(master, text="█", width=10).grid(column=6, row=5) 
+            self.r9=ttk.Button(master, text="►", command=lambda:self.increase(2), width=10).grid(column=8, row=5)
+            self.r10=ttk.Button(master, text="►►", command=self.mouvement, width=10).grid(column=9, row=5)
+            self.r10=ttk.Button(master, text="►|", command=self.mouvement, width=10).grid(column=10, row=5)
+            self.r11=ttk.Button(master, text="◄", command=lambda:self.decrease(2), width=10).grid(column=6, row=5)
+            self.r12=ttk.Button(master, text="◄◄", width=10).grid(column=5, row=5)     
+            self.r10=ttk.Button(master, text="|◄", command=self.mouvement, width=10).grid(column=4, row=5)
+            self.r13=ttk.Button(master, text="Home", command=lambda:self.home1(2), width=10).grid(column=11, row=5)  
+            self.r14=ttk.Button(master, text="█", width=10).grid(column=7, row=5) 
             
     
     
             # Sixth part the modification of the two engines
         
-            tk.Label(master, text="").grid(column=10)
+            tk.Label(master, text="").grid(column=16)
             tk.Label(master, text="").grid(row=6)
             frame = tk.Frame(self.master, width=50, height=50, highlightbackground="black", highlightthickness=2)
             frame.grid(row=0, column=11, rowspan=7)
@@ -469,9 +478,74 @@ with Connection.open_serial_port("COM8") as connection:
         
         
         def increase(self, button_num):
-            random_number_step2 = round(random.uniform(0.01, 0.09999), 5)
-            random=10/random_number_step2
-            self.Check=1
+            number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
+            number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+            self.number50_str.set(str(number50))
+            self.number150_str.set(str(number150))  
+            print(f"\nPosition axe 1 :: '{number150}'")
+            print(f"\nPosition axe 2 :: '{number50}'")
+            i=0
+            if button_num == 1:
+                    
+                    while i < 20 and self.Check == 1:
+                            i=i+1
+                            self.master.update()
+                            print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
+                            axis1.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                            self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                            self.master.update()
+                    if self.Check==2:
+                            self.stop_all_axis
+            elif button_num == 2:
+
+                    while i < 20 and self.Check == 1:
+                        i=i+1
+                        self.master.update()
+                        print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
+                        axis2.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                        self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                        self.master.update()
+                    
+                    if self.Check==2:
+                            self.stop_all_axis
+
+            elif button_num == 3:
+                    NumberStep=5
+                    quotient, remainder = divmod(abs(self.Limit_MaxAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+1), NumberStep)
+                    integer_part = quotient-1
+                    decimal_part = remainder / NumberStep
+                    
+                    while i < integer_part and self.Check == 1:
+                            i=i+1
+                            
+                            self.master.update()
+                            print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
+                            axis1.move_relative(NumberStep, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                            self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
+                            self.master.update()
+                            
+                    if self.Check==1:    
+                        axis1.move_relative(NumberStep*(decimal_part+1), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                
+                    if self.Check==2:
+                            self.stop_all_axis        
+                            
+                            
+                            
+                            
+            number50 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+            number150 = axis2.get_position(Units.LENGTH_MILLIMETRES)    
+            print(f"\nPosition axe 1 :: '{number50}'")
+            print(f"\nPosition axe 2 :: '{number150}'")
+                        
+                            
+                            
+                            
+                            
+                            
+                            
+            
+        def decrease (self, button_num):
             number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
             number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
             self.number50_str.set(str(number50))
@@ -485,18 +559,18 @@ with Connection.open_serial_port("COM8") as connection:
                         i=i+1
                         self.master.update()
                         print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
-                        axis1.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                        axis1.move_relative(-0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                         self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                         self.master.update()
                     if self.Check==2:
                             self.stop_all_axis
             elif button_num == 2:
 
-                    while i < 10 and self.Check == 1:
+                    while i < 20 and self.Check == 1:
                         i=i+1
                         self.master.update()
                         print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
-                        axis2.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                        axis2.move_relative(-0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                         self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                         self.master.update()
                     if self.Check==2:
@@ -505,18 +579,6 @@ with Connection.open_serial_port("COM8") as connection:
             number150 = axis2.get_position(Units.LENGTH_MILLIMETRES)    
             print(f"\nPosition axe 1 :: '{number50}'")
             print(f"\nPosition axe 2 :: '{number150}'")
-            
-        def decrease (self):
-            #axis1.move_absolute(3, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-            i=0
-            j=0
-            for i in range(10):
-                
-                self.number50_str.set(i)
-                print(f"\nNombre i :: '{i}'")
-                if i >=2:
-                    j=j+1
-                    time.sleep(i-j)
             
         
         def mouvement(self):
