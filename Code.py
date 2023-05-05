@@ -29,7 +29,7 @@ root.mainloop()
 
 
 
-
+import math
 import tkinter.filedialog as filedialog
 import tkinter as tk
 import subprocess
@@ -1054,6 +1054,12 @@ with Connection.open_serial_port("COM8") as connection:
                 self.Diameter = int(self.Diameter.get())
                 self.PositionAxis1circle = float(self.PositionAxis1circle.get())
                 self.PositionAxis2circle = float(self.PositionAxis2circle.get())
+                
+                if self.PositionAxis1circle=="":
+                     self.PositionAxis1circle=axis1.get_position(Units.LENGTH_MILLIMETRES)
+                if self.PositionAxis2circle=="":
+                     self.PositionAxis2circle=axis2.get_position(Units.LENGTH_MILLIMETRES)                
+                    
                 if abs(self.PositionAxis1circle-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(self.PositionAxis2circle-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
                     MovementTime = 6/2
                 random_number_step=0.15
@@ -1079,23 +1085,27 @@ with Connection.open_serial_port("COM8") as connection:
                   
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
-                
-                
-                while i<LoopCircle and self.Check == 1:
-                    self.centre_x = axis1.get_position(Units.LENGTH_MILLIMETRES) + self.Diameter/2
-                    self.centre_y = axis2.get_position(Units.LENGTH_MILLIMETRES)
+                while self.Check == 1:    
+                    PositionBeginAxis1 = axis1.get_position(Units.LENGTH_MILLIMETRES)
+                    PositionBeginAxis2 = axis2.get_position(Units.LENGTH_MILLIMETRES)
+                    while i<LoopCircle and self.Check == 1:
+                        
+                        self.centre_x = axis1.get_position(Units.LENGTH_MILLIMETRES) + (self.Diameter)/2
+                        self.centre_y = axis2.get_position(Units.LENGTH_MILLIMETRES)
+                        
+                        nb_etapes = 120
+                        angle_step = 2 * math.pi / nb_etapes
+                        
+                        for i in range(nb_etapes):
+                        # Calculer l'angle de cette étape
+                            angle = i * angle_step
                     
-                    nb_etapes = 120
-                    angle_step = 2 * math.pi / nb_etapes
-                    
-                    for i in range(nb_etapes):
-                    # Calculer l'angle de cette étape
-                        angle = i * angle_step
-                
-                        # Calculer les coordonnées de cette étape
-                        axis1.get_position(Units.LENGTH_MILLIMETRES) = -(self.centre_x + (self.Diameter/2 * math.cos(angle)))
-                        axis2.get_position(Units.LENGTH_MILLIMETRES) = (self.centre_y + (self.Diameter/2 * math.sin(angle)))
-                        canvas.create_oval(100+x, 100+y, 100+x+1, 100+y+1)
+                            # Calculer les coordonnées de cette étape
+                            axis1 = -(self.centre_x + (self.Diameter/2 * math.cos(angle)))
+                            axis1.move_absolu(axis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                            axis2 = (self.centre_y + (self.Diameter/2 * math.sin(angle)))
+                            axis2.move_absolu(axis2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+
                         # Afficher les coordonnées de cette étape
                         print("Étape", i+1, ": (", x, ",", y, ")")
             # Créer une nouvelle fenêtre
