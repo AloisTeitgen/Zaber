@@ -1051,16 +1051,16 @@ with Connection.open_serial_port("COM8") as connection:
         def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter, LoopCircle):
                 MovementTime = 20/2
                 
-                if LoopCircle!="":
+                if LoopCircle!='':
                     self.LoopCircle = int(LoopCircle.get())
                 else:
                     self.LoopCircle = 1
                 self.Diameter = float(Diameter.get())
-                if PositionAxis1circle !="":
+                if PositionAxis1circle !='':
                     self.PositionAxis1circle = float(PositionAxis1circle.get())
                 else:
                     self.PositionAxis1circle=axis1.get_position(Units.LENGTH_MILLIMETRES)
-                if PositionAxis2circle !="":
+                if PositionAxis2circle !='':
                     self.PositionAxis2circle = float(PositionAxis2circle.get())
                 else:
                     self.PositionAxis2circle=axis2.get_position(Units.LENGTH_MILLIMETRES)
