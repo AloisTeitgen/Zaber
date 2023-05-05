@@ -95,8 +95,8 @@ with Connection.open_serial_port("COM8") as connection:
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
             
-            self.Limit_MaxAxis1=147
-            self.Limit_MaxAxis2=47
+            self.Limit_MaxAxis1=148.5
+            self.Limit_MaxAxis2=48.5
             
             self.Limit_MinAxis1=1
             self.Limit_MinAxis2=1
@@ -1046,20 +1046,17 @@ with Connection.open_serial_port("COM8") as connection:
             
             
             
-            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement()).grid(row=11, column=2) 
+            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter, self.LoopCircle)).grid(row=11, column=2) 
 
-        def circleMovement(self):
+        def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter, LoopCircle):
                 MovementTime = 20/2
-                self.LoopCircle = int(self.LoopCircle.get())
-                self.Diameter = int(self.Diameter.get())
-                self.PositionAxis1circle = float(self.PositionAxis1circle.get())
-                self.PositionAxis2circle = float(self.PositionAxis2circle.get())
-                
-                if self.PositionAxis1circle=="":
-                     self.PositionAxis1circle=axis1.get_position(Units.LENGTH_MILLIMETRES)
-                if self.PositionAxis2circle=="":
-                     self.PositionAxis2circle=axis2.get_position(Units.LENGTH_MILLIMETRES)                
-                    
+                self.LoopCircle = int(LoopCircle.get())
+                if LoopCircle=="":
+                    self.LoopCircle=1
+                self.LoopCircle = int(LoopCircle.get())
+                self.Diameter = int(Diameter.get())
+                self.PositionAxis1circle = float(PositionAxis1circle.get())
+                self.PositionAxis2circle = float(PositionAxis2circle.get())
                 if abs(self.PositionAxis1circle-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(self.PositionAxis2circle-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
                     MovementTime = 6/2
                 random_number_step=0.15
@@ -1085,29 +1082,36 @@ with Connection.open_serial_port("COM8") as connection:
                   
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
-                while self.Check == 1:    
-                    PositionBeginAxis1 = axis1.get_position(Units.LENGTH_MILLIMETRES)
-                    PositionBeginAxis2 = axis2.get_position(Units.LENGTH_MILLIMETRES)
-                    while i<LoopCircle and self.Check == 1:
-                        
-                        self.centre_x = axis1.get_position(Units.LENGTH_MILLIMETRES) + (self.Diameter)/2
-                        self.centre_y = axis2.get_position(Units.LENGTH_MILLIMETRES)
-                        
-                        nb_etapes = 120
-                        angle_step = 2 * math.pi / nb_etapes
-                        
-                        for i in range(nb_etapes):
-                        # Calculer l'angle de cette étape
-                            angle = i * angle_step
+                OldPositionAxis1=axis1.get_position(Units.LENGTH_MILLIMETRES)
+                OldPositionAxis2=axis2.get_position(Units.LENGTH_MILLIMETRES)
+                i=0
+                if self.Check == 1:
+                    self.centre_x = axis1.get_position(Units.LENGTH_MILLIMETRES) + self.Diameter/2
+                    self.centre_y = axis2.get_position(Units.LENGTH_MILLIMETRES)
                     
-                            # Calculer les coordonnées de cette étape
-                            axis1 = -(self.centre_x + (self.Diameter/2 * math.cos(angle)))
-                            axis1.move_absolu(axis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-                            axis2 = (self.centre_y + (self.Diameter/2 * math.sin(angle)))
-                            axis2.move_absolu(axis2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 1, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
-
+                    nb_etapes = 12
+                    angle_step = 2 * math.pi / nb_etapes
+                    
+                    while  i<self.LoopCircle and self.Check == 1:
+                    # Calculer l'angle de cette étape
+                        angle = i * angle_step
+                
+                        # Calculer les coordonnées de cette étape
+                        Movementaxis1 = -(self.centre_x + (self.Diameter/2 * math.cos(angle)))
+                        axis1.move_relative(Movementaxis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0.5, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                        Movementaxis2 = (self.centre_y + (self.Diameter/2 * math.sin(angle)))
+                        axis2.move_absolu(Movementaxis2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0.5, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                        
                         # Afficher les coordonnées de cette étape
-                        print("Étape", i+1, ": (", x, ",", y, ")")
+                        print("Étape", i+1, ": (", Movementaxis1, ",", Movementaxis2, ")")
+                        i=i+1
+                        if self.Check==2:
+                                self.stop_all_axis()
+                                break
+                            
+                axis1.move_relative(OldPositionAxis1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0.5, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                axis2.move_relative(OldPositionAxis2, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0.5, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+            
             # Créer une nouvelle fenêtre
                            
                 #self.TwoDevice(1)
