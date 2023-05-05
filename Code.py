@@ -880,13 +880,15 @@ with Connection.open_serial_port("COM8") as connection:
                 
         def TwoDevice(self, numberselection):
             number=0.654
-            
+            value=0
             if numberselection==1:
                 if "." in self.number_text_AbsolutePosition.get():
                     a=0
                 else:
                     value=self.number_text_AbsolutePosition.get() + ".000"
-                
+                    float (value)
+                print(f"\n value : '{value}'")
+                #value = float(value)
                 MovementTime = 20/2
                 if abs(value-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(value-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
                     MovementTime = 6/2
