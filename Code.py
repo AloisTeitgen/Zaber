@@ -1070,11 +1070,11 @@ with Connection.open_serial_port("COM8") as connection:
             
             
             
-            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter, self.LoopCircle))
+            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter))
             self.ACCEPT_ALL.grid(row=11, column=2) 
 
 
-        def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter, LoopCircle):
+        def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter):
                 MovementTime = Decimal(20/2)
                 increase = Decimal(0.00000001)
                 increase2=Decimal(1.0000000)
@@ -1099,7 +1099,9 @@ with Connection.open_serial_port("COM8") as connection:
                 
                 if abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)))<0.5 or abs(self.PositionAxis2circle-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))<0.5:
                     MovementTime = 6/2
+                
                 random_number_step=Decimal(0.150000)
+                
                 TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) - self.PositionAxis1circle)+increase2)         
                 velocity0= random_number_step/TimeByStep
                 quotient, remainder = divmod(abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+increase), random_number_step)
