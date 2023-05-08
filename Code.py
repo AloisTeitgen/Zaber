@@ -63,7 +63,7 @@ with Connection.open_serial_port("COM8") as connection:
     device = device_list[0]
     axis1 = device.get_axis(1)
     axis2 = device.get_axis(2)
-
+    increment_value = Decimal(0.00000001)
     
     class Interface:
         
@@ -95,11 +95,11 @@ with Connection.open_serial_port("COM8") as connection:
             self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
             
-            self.Limit_MaxAxis1=148.5
-            self.Limit_MaxAxis2=48.5
+            self.Limit_MaxAxis1=Decimal(148.5000000000)
+            self.Limit_MaxAxis2=(48.500000000)
             
-            self.Limit_MinAxis1=1
-            self.Limit_MinAxis2=1
+            self.Limit_MinAxis1=Decimal(1.0000000000)
+            self.Limit_MinAxis2=Decimal(1.0000000000)
             
             axis1.settings.set("limit.max", self.Limit_MaxAxis1, Units.LENGTH_MILLIMETRES)
             axis2.settings.set("limit.max", self.Limit_MaxAxis2, Units.LENGTH_MILLIMETRES)
@@ -609,14 +609,15 @@ with Connection.open_serial_port("COM8") as connection:
         
         def home(self):
             print("test")
+            
             i=0
             random_number_step1=Decimal(0.300000)
-            quotient, remainder = Decimal(divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1))
+            quotient, remainder = (divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+increment_value), random_number_step1))
             integer_part = quotient-1
             decimal_part = Decimal(remainder / random_number_step1)   
             
             if axis1.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis1+1 and self.Check == 1:
-                random_number_step2 = Decimal((abs(axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient)
+                random_number_step2 = ((abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+increment_value))/quotient)
             
                 while i < integer_part-2 and self.Check == 1:
                     i=i+1
@@ -629,7 +630,7 @@ with Connection.open_serial_port("COM8") as connection:
                             break
                     
             elif axis1.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MinAxis1+1 and axis2.get_position(Units.LENGTH_MILLIMETRES) > self.Limit_MinAxis2+1 and self.Check == 1:
-                quotient, remainder = Decimal(divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1))
+                quotient, remainder =(divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+increment_value), random_number_step1))
                 integer_part = quotient-1
                 decimal_part = Decimal(remainder / random_number_step1)              
                 
