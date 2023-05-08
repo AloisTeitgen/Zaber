@@ -28,7 +28,7 @@ root.mainloop()
 
 
 
-
+import decimal
 import math
 import tkinter.filedialog as filedialog
 import tkinter as tk
@@ -39,7 +39,7 @@ import time
 import random
 
 
-
+from decimal import Decimal
 from zaber_motion import Units, Library
 from zaber_motion.ascii import Connection, SettingConstants
 from zaber_motion.ascii import AlertEvent
@@ -271,19 +271,19 @@ with Connection.open_serial_port("COM8") as connection:
             #Movement=num_entries
             print(f"\n num_entries :: '{Movement}'")
             for i in range(Movement):
-                random_number_step = round(random.uniform(0.01, 0.09999), 5)
+                random_number_step = Decimal(round(random.uniform(0.0001000, 0.0009999), 7))
                 print(f"\nRandom_number_step :: '{random_number_step}'")
                 self.number150_str.set(str(axis1.get_position(Units.LENGTH_MILLIMETRES)))
                 self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
                 if self.Sleeptime[i+1].get()=="":
                     SleepTimeNow = 1
                 elif self.Sleeptime[i+1].get()!="":
-                    SleepTimeNow = float(self.Sleeptime[i+1].get())
+                    SleepTimeNow = Decimal(self.Sleeptime[i+1].get())
                 
                 if self.positionAxis2_[i+1].get() != "":
-                    PositionNowAxis2 = float(self.positionAxis2_[i+1].get())
+                    PositionNowAxis2 = Decimal(self.positionAxis2_[i+1].get())
                     if PositionNowAxis2==0:
-                        PositionNowAxis2=0.00001
+                        PositionNowAxis2=Decimal(0.00001)
                 elif self.positionAxis2_[i+1].get() =="":
                     PositionNowAxis2= axis2.get_position(Units.LENGTH_MILLIMETRES)
                 
@@ -292,7 +292,7 @@ with Connection.open_serial_port("COM8") as connection:
                 if self.positionAxis1_[i+1].get() !="":
                     PositionNowAxis1 = float(self.positionAxis1_[i+1].get())
                     if PositionNowAxis1==0:
-                        PositionNowAxis1=0.00001
+                        PositionNowAxis1=Decimal(0.00001)
                     
                     
                     
@@ -307,7 +307,7 @@ with Connection.open_serial_port("COM8") as connection:
                     if abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
                         MovementTime = 6/2
                 elif self.MovementTime[i+1].get() != "":
-                    MovementTime = float(self.MovementTime[i+1].get())/2
+                    MovementTime = Decimal(self.MovementTime[i+1].get())/2
 
                 
 
@@ -315,21 +315,21 @@ with Connection.open_serial_port("COM8") as connection:
                 print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
                
                 
-                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - PositionNowAxis1)+1)         
-                velocity0= random_number_step/TimeByStep
+                TimeByStep=Decimal(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - PositionNowAxis1)+1)         
+                velocity0= Decimal(random_number_step/TimeByStep)
                 OldPositionX = axis1.get_position(Units.LENGTH_MILLIMETRES) 
                 OldPositionY = axis2.get_position(Units.LENGTH_MILLIMETRES) 
-                quotient, remainder = divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+0.01), random_number_step)
+                quotient, remainder = Decimal(divmod(abs(PositionNowAxis1-axis1.get_position(Units.LENGTH_MILLIMETRES)+0.01), random_number_step))
                 integer_part = quotient-1
-                decimal_part = remainder / random_number_step
+                decimal_part = Decimal(remainder / random_number_step)
                 
-                random_number_step2 = (abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient   
+                random_number_step2 = Decimal((abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient   )
                              
                 quotient2, remainder = divmod(abs(PositionNowAxis2-axis2.get_position(Units.LENGTH_MILLIMETRES)+0.01), random_number_step2)
                 integer_part2 = quotient2-1
                 decimal_part2 = remainder / random_number_step2              
                 
-                
+                print(f"\n decimal_part :: '{decimal_part}'") 
                 
                 
                 time.sleep(SleepTimeNow)
@@ -610,13 +610,13 @@ with Connection.open_serial_port("COM8") as connection:
         def home(self):
             print("test")
             i=0
-            random_number_step1=0.3
-            quotient, remainder = divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1)
+            random_number_step1=Decimal(0.300000)
+            quotient, remainder = Decimal(divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1))
             integer_part = quotient-1
-            decimal_part = remainder / random_number_step1   
+            decimal_part = Decimal(remainder / random_number_step1)   
             
             if axis1.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis1+1 and self.Check == 1:
-                random_number_step2 = (abs(axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient  
+                random_number_step2 = Decimal((abs(axis2.get_position(Units.LENGTH_MILLIMETRES)))/quotient)
             
                 while i < integer_part-2 and self.Check == 1:
                     i=i+1
@@ -629,11 +629,11 @@ with Connection.open_serial_port("COM8") as connection:
                             break
                     
             elif axis1.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MinAxis1+1 and axis2.get_position(Units.LENGTH_MILLIMETRES) > self.Limit_MinAxis2+1 and self.Check == 1:
-                quotient, remainder = divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1)
+                quotient, remainder = Decimal(divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1))
                 integer_part = quotient-1
-                decimal_part = remainder / random_number_step1                 
+                decimal_part = Decimal(remainder / random_number_step1)              
                 
-                while i < integer_part-2 and self.Check == 1:
+                while i < integer_part-1 and self.Check == 1:
                     i=i+1
                     axis2.move_relative(-random_number_step1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=0.9, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                     self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))                 
@@ -885,15 +885,14 @@ with Connection.open_serial_port("COM8") as connection:
                 if "." in self.number_text_AbsolutePosition.get():
                     a=0
                 else:
-                    value=self.number_text_AbsolutePosition.get() + ".000"
-                    float (value)
+                    value=Decimal(self.number_text_AbsolutePosition.get())
                 print(f"\n value : '{value}'")
                 #value = float(value)
-                MovementTime = 20/2
-                if abs(value-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(value-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
-                    MovementTime = 6/2
-                random_number_step=0.07
-                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - value)+1)         
+                MovementTime = Decimal('16.00000000')/Decimal('2')
+                print(f"\n axis1.get_position(Units.LENGTH_MILLIMETRES) : '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'")
+                random_number_step=Decimal(0.075)
+                print(f"\n MovementTime : '{MovementTime}'")
+                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(str(axis1.get_position(Units.LENGTH_MILLIMETRES))) - value)+1)
                 velocity0= random_number_step/TimeByStep
                 quotient, remainder = divmod(abs(value-axis1.get_position(Units.LENGTH_MILLIMETRES)+0.01), random_number_step)
                 integer_part = quotient-1
@@ -920,7 +919,7 @@ with Connection.open_serial_port("COM8") as connection:
                     if "." in self.number_text_RelativePosition.get():
                         a=0
                     else:
-                        value=self.number_text_RelativePosition.get() + ".000"
+                        value=float(self.number_text_RelativePosition.get() + ".000")
                     while axis1.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MaxAxis1 or axis2.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MaxAxis2 and self.Check == 1:
                             
                             i=0
@@ -943,7 +942,7 @@ with Connection.open_serial_port("COM8") as connection:
                     if "." in self.number_text_RelativePosition.get():
                         a=0
                     else:
-                        value=self.number_text_RelativePosition.get() + ".000"
+                        value=float(self.number_text_RelativePosition.get() + ".000")
                     while self.Check == 1:
                             
                             i=0
