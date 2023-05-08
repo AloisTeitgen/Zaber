@@ -1107,7 +1107,7 @@ with Connection.open_serial_port("COM8") as connection:
                 velocity0= random_number_step/TimeByStep
                 quotient, remainder = divmod(abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+increase), random_number_step)
                 integer_part = quotient-1
-                decimal_part = Decimal(remainder / random_number_step)
+                decimal_part = Decimal(((remainder*1000000) / random_number_step)/1000000)
                 
                 print(f"\n decimal part : {decimal_part}")
                 if quotient !=0:
@@ -1118,11 +1118,11 @@ with Connection.open_serial_port("COM8") as connection:
                 if Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) < self.PositionAxis1circle and Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)) < self.PositionAxis2circle :
                             #à envoyer : MovementTime, integer_part,decimal_part, random_number_step, la velocité nommé velocity0, ConfigureNumber (dans quel "if" on est), 
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 1)
-                elif Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) >= self.PositionAxis1circle and Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)) < self.PositionAxis2circle :
+                elif axis1.get_position(Units.LENGTH_MILLIMETRES) >= self.PositionAxis1circle and axis2.get_position(Units.LENGTH_MILLIMETRES) < self.PositionAxis2circle :
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 2)
-                elif Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) < self.PositionAxis1circle and Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)) >= self.PositionAxis2circle :
+                elif axis1.get_position(Units.LENGTH_MILLIMETRES) < self.PositionAxis1circle and axis2.get_position(Units.LENGTH_MILLIMETRES) >= self.PositionAxis2circle :
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 3)
-                elif Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) >= self.PositionAxis1circle and Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)) >= self.PositionAxis2circle :    
+                elif axis1.get_position(Units.LENGTH_MILLIMETRES) >= self.PositionAxis1circle and axis2.get_position(Units.LENGTH_MILLIMETRES) >= self.PositionAxis2circle :    
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 4)
                   
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
