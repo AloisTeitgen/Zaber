@@ -63,7 +63,7 @@ with Connection.open_serial_port("COM8") as connection:
     device = device_list[0]
     axis1 = device.get_axis(1)
     axis2 = device.get_axis(2)
-    increment_value = Decimal(0.00000001)
+    
     
     class Interface:
         
@@ -612,12 +612,12 @@ with Connection.open_serial_port("COM8") as connection:
             
             i=0
             random_number_step1=Decimal(0.300000)
-            quotient, remainder = (divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+increment_value), random_number_step1))
+            quotient, remainder = (divmod(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+0.00000001, random_number_step1)))
             integer_part = quotient-1
             decimal_part = Decimal(remainder / random_number_step1)   
             
             if axis1.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis1+1 and self.Check == 1:
-                random_number_step2 = ((abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+increment_value))/quotient)
+                random_number_step2 = ((abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+0.00000001)/quotient)
             
                 while i < integer_part-2 and self.Check == 1:
                     i=i+1
@@ -630,7 +630,7 @@ with Connection.open_serial_port("COM8") as connection:
                             break
                     
             elif axis1.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MinAxis1+1 and axis2.get_position(Units.LENGTH_MILLIMETRES) > self.Limit_MinAxis2+1 and self.Check == 1:
-                quotient, remainder =(divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+increment_value), random_number_step1))
+                quotient, remainder =(divmod(abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+0.00000001, random_number_step1))
                 integer_part = quotient-1
                 decimal_part = Decimal(remainder / random_number_step1)              
                 
