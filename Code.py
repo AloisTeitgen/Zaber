@@ -1075,7 +1075,7 @@ with Connection.open_serial_port("COM8") as connection:
 
 
         def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter):
-                MovementTime = Decimal(20/2)
+                
                 increase = Decimal(0.00000001)
                 increase2=Decimal(1.0000000)
                 if self.LoopCircle.get()!='':
@@ -1097,10 +1097,11 @@ with Connection.open_serial_port("COM8") as connection:
                 else:
                     self.PositionAxis2circle= Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
+                MovementTime = Decimal(20/2)
                 if abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)))<0.5 or abs(self.PositionAxis2circle-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))<0.5:
-                    MovementTime = 6/2
+                    MovementTime = Decimal(6/2)
                 
-                random_number_step=Decimal(0.150000)
+                random_number_step=Decimal(0.0150000)
                 
                 TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) - self.PositionAxis1circle)+increase2)         
                 velocity0= random_number_step/TimeByStep
