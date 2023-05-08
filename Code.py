@@ -1070,34 +1070,37 @@ with Connection.open_serial_port("COM8") as connection:
             
             
             
-            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter, self.LoopCircle)).grid(row=11, column=2) 
+            self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter, self.LoopCircle))
+            self.ACCEPT_ALL.grid(row=11, column=2) 
+
 
         def circleMovement(self, PositionAxis1circle, PositionAxis2circle, MovementTimecircle, Diameter, LoopCircle):
-                MovementTime = 20/2
+                MovementTime = Decimal(20/2)
                 increase = Decimal(0.00000001)
-                if LoopCircle.get()!='':
+                increase2=Decimal(1.0000000)
+                if self.LoopCircle.get()!='':
                     self.LoopCircle = int(LoopCircle.get())
                 else:
                     self.LoopCircle = 1
 
                 print(f"\n LoopCircle : {self.LoopCircle}")
-                if "." in Diameter:
+                if "." in str(Diameter):
                     a=0
                 else:
-                        Diameter=self.Diameter.get() + ".000"
+                        Diameter=Decimal(self.Diameter.get() + ".000")
                 if PositionAxis1circle.get() !="":
                     self.PositionAxis1circle = Decimal(PositionAxis1circle.get())
                 else:
-                    self.PositionAxis1circle=Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))
+                    self.PositionAxis1circle= Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))
                 if PositionAxis2circle.get() !="":
                     self.PositionAxis2circle = Decimal(PositionAxis2circle.get())
                 else:
-                    self.PositionAxis2circle=Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))
+                    self.PositionAxis2circle= Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))
                 
-                if abs(self.PositionAxis1circle-axis1.get_position(Units.LENGTH_MILLIMETRES))<0.5 or abs(self.PositionAxis2circle-axis2.get_position(Units.LENGTH_MILLIMETRES))<0.5:
+                if abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)))<0.5 or abs(self.PositionAxis2circle-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))<0.5:
                     MovementTime = 6/2
                 random_number_step=Decimal(0.150000)
-                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(axis1.get_position(Units.LENGTH_MILLIMETRES) - self.PositionAxis1circle)+1)         
+                TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) - self.PositionAxis1circle)+increase2)         
                 velocity0= random_number_step/TimeByStep
                 quotient, remainder = divmod(abs(self.PositionAxis1circle-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+increase), random_number_step)
                 integer_part = quotient-1
