@@ -96,7 +96,7 @@ with Connection.open_serial_port("COM8") as connection:
             self.number50_str.set(str(axis2.get_position(Units.LENGTH_MILLIMETRES)))
             
             self.Limit_MaxAxis1=Decimal(148.5000000000)
-            self.Limit_MaxAxis2=(48.500000000)
+            self.Limit_MaxAxis2=Decimal(48.500000000)
             
             self.Limit_MinAxis1=Decimal(1.0000000000)
             self.Limit_MinAxis2=Decimal(1.0000000000)
@@ -609,17 +609,17 @@ with Connection.open_serial_port("COM8") as connection:
         
         def home(self):
             print("test")
-            
+            increment_value = Decimal("0.00000001")
             i=0
             random_number_step1=Decimal(0.300000)
-            quotient, remainder = (divmod(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+0.00000001, random_number_step1)))
+            quotient, remainder = (divmod(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+ increment_value), random_number_step1))
             integer_part = quotient-1
             decimal_part = Decimal(remainder / random_number_step1)   
             
             if axis1.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis1+1 and self.Check == 1:
-                random_number_step2 = ((abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+0.00000001)/quotient)
+                random_number_step2 = ((abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+ increment_value)/quotient)
             
-                while i < integer_part-2 and self.Check == 1:
+                while i < integer_part-1 and self.Check == 1:
                     i=i+1
                     axis1.move_relative(-random_number_step1, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity=0.9, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                     if axis2.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis2+1:
@@ -630,7 +630,7 @@ with Connection.open_serial_port("COM8") as connection:
                             break
                     
             elif axis1.get_position(Units.LENGTH_MILLIMETRES) < self.Limit_MinAxis1+1 and axis2.get_position(Units.LENGTH_MILLIMETRES) > self.Limit_MinAxis2+1 and self.Check == 1:
-                quotient, remainder =(divmod(abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+0.00000001, random_number_step1))
+                quotient, remainder =(divmod(abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES)))+ increment_value, random_number_step1))
                 integer_part = quotient-1
                 decimal_part = Decimal(remainder / random_number_step1)              
                 
@@ -653,11 +653,12 @@ with Connection.open_serial_port("COM8") as connection:
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))          
             
         def home1(self, number):
+            increment_value = Decimal("0.00000001")
             i=0
             
             if number==1 :
-                random_number_step1=0.3
-                quotient, remainder = divmod(abs(axis1.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1)
+                random_number_step1=Decimal(0.300000)
+                quotient, remainder = divmod(abs(Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+increment_value), random_number_step1)
                 integer_part = quotient-1
             
                 while i < integer_part-2 and self.Check == 1 and axis1.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MaxAxis1+1 :
@@ -672,8 +673,8 @@ with Connection.open_serial_port("COM8") as connection:
                     
                    
             elif number==2 :
-                random_number_step1=0.3
-                quotient, remainder = divmod(abs(axis2.get_position(Units.LENGTH_MILLIMETRES)+0.001), random_number_step1)
+                random_number_step1=Decimal(0.300000)
+                quotient, remainder = divmod(abs(Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))+increment_value), random_number_step1)
                 integer_part = quotient-1                
                 
                 while i < integer_part-2 and self.Check == 1 and axis2.get_position(Units.LENGTH_MILLIMETRES)>self.Limit_MinAxis2+1 :
@@ -689,6 +690,7 @@ with Connection.open_serial_port("COM8") as connection:
         
         
         def increase(self, button_num):
+            increment_value = Decimal("0.00000001")
             number50 = axis2.get_position(Units.LENGTH_MILLIMETRES)
             number150 = axis1.get_position(Units.LENGTH_MILLIMETRES)
             self.number50_str.set(str(number50))
@@ -702,7 +704,7 @@ with Connection.open_serial_port("COM8") as connection:
                             i=i+1
                             self.master.update()
                             print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
-                            axis1.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                            axis1.move_relative(Decimal(0.5000000), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                             self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                             self.master.update()
                             if self.Check==2:
@@ -714,7 +716,7 @@ with Connection.open_serial_port("COM8") as connection:
                             i=i+1
                             self.master.update()
                             print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'\n")
-                            axis2.move_relative(0.5, unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
+                            axis2.move_relative(Decimal(0.5000000), unit = Units.LENGTH_MILLIMETRES, wait_until_idle = True, velocity = 0, velocity_unit = Units.VELOCITY_MILLIMETRES_PER_SECOND, acceleration = 0, acceleration_unit = Units.NATIVE)
                             self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
                             self.master.update()
                     
@@ -723,10 +725,12 @@ with Connection.open_serial_port("COM8") as connection:
                                     break
 
             elif button_num == 3:
-                    NumberStep=1
-                    quotient, remainder = divmod(abs((self.Limit_MaxAxis1-0.9)-axis1.get_position(Units.LENGTH_MILLIMETRES)+0.01), NumberStep)
+                    NumberStep=Decimal(1.00000)
+                    Security=Decimal(0.90000)
+                    quotient, remainder = divmod(abs(Decimal(self.Limit_MaxAxis1- Security)-Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES))+increment_value), NumberStep)
+
                     integer_part = quotient-1
-                    decimal_part = remainder / NumberStep
+                    decimal_part = Decimal(remainder / NumberStep)
                     while i < integer_part and self.Check == 1:
                             i=i+1
                             
@@ -745,10 +749,11 @@ with Connection.open_serial_port("COM8") as connection:
                             
 
             elif button_num == 4:
-                    NumberStep=1
-                    quotient, remainder = divmod(abs((self.Limit_MaxAxis2-0.9)-axis2.get_position(Units.LENGTH_MILLIMETRES)+0.01), NumberStep)
+                    NumberStep=Decimal(1.00000)
+                    Security=Decimal(0.90000)
+                    quotient, remainder = divmod(abs((self.Limit_MaxAxis2- Security)-axis2.get_position(Units.LENGTH_MILLIMETRES)+0.01), NumberStep)
                     integer_part = quotient-1
-                    decimal_part = remainder / NumberStep
+                    decimal_part = Decimal(remainder / NumberStep)
                     while i < integer_part and self.Check == 1:
                             i=i+1
                             self.master.update()
