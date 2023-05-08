@@ -1157,7 +1157,7 @@ with Connection.open_serial_port("COM8") as connection:
             
                 while i<=self.LoopCircle and self.Check == 1:
                     diameter = self.Diameter
-                    j=2*(diameter*1000)
+                    j=2*(decimal(diameter.get())*1000)
                     
                     
                     x=0
