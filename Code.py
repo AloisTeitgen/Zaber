@@ -1120,7 +1120,7 @@ with Connection.open_serial_port("COM8") as connection:
                 if abs(self.PositionAxis1circle-Decimal(PositionAxis1))<0.5 or abs(self.PositionAxis2circle-Decimal(PositionAxis2))<0.5:
                     MovementTime = Decimal(6/2)
                 
-                random_number_step=Decimal(0.0050000)
+                random_number_step=Decimal(0.9999990000)
                 print(f"\n LoopCircle : {self.LoopCircle}")
                 TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(PositionAxis1) - self.PositionAxis1circle)+increase)         
                 velocity0= random_number_step/TimeByStep
@@ -1129,20 +1129,24 @@ with Connection.open_serial_port("COM8") as connection:
                 decimal_part = Decimal(((remainder*1000000) / random_number_step)/1000000)
                 print(f"\n integer_part : {integer_part}")
                 print(f"\n decimal part : {decimal_part}")
-                
+                if quotient <0.01:
+                    quotient = 0.001
                 random_number_step2 = ((abs(self.PositionAxis2circle-Decimal(PositionAxis2)))/Decimal(quotient) )
                 print(f"\n random_number_step : {random_number_step}")
                 print(f"\n random_number_step2 : {random_number_step2}")
                 print(f"\n Decimal(PositionAxis2): {Decimal(PositionAxis2)}")
+                
+                
+                
                 if Decimal(axis1.get_position(Units.LENGTH_MILLIMETRES)) < self.PositionAxis1circle and Decimal(PositionAxis2) < self.PositionAxis2circle :
                             #à envoyer : MovementTime, integer_part,decimal_part, random_number_step, la velocité nommé velocity0, ConfigureNumber (dans quel "if" on est), 
                    
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 1)
-                elif PositionAxis1 >= self.PositionAxis1circle and PositionAxis2 < self.PositionAxis2circle :
+                elif PositionAxis1 > self.PositionAxis1circle and PositionAxis2 < self.PositionAxis2circle :
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 2)
-                elif PositionAxis1 < self.PositionAxis1circle and PositionAxis2 >= self.PositionAxis2circle :
+                elif PositionAxis1 < self.PositionAxis1circle and PositionAxis2 > self.PositionAxis2circle :
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 3)
-                elif PositionAxis1 >= self.PositionAxis1circle and PositionAxis2 >= self.PositionAxis2circle :    
+                elif PositionAxis1 > self.PositionAxis1circle and PositionAxis2 > self.PositionAxis2circle :    
                     self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, self.PositionAxis1circle, self.PositionAxis2circle, velocity0, 4)
                   
                 self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
@@ -1152,17 +1156,18 @@ with Connection.open_serial_port("COM8") as connection:
                 i=1
             
                 while i<=self.LoopCircle and self.Check == 1:
-                    j=0
+                    diameter = self.Diameter
+                    j=2*(diameter*1000)
                     
                     
                     x=0
                     y=0
-                    diameter = self.Diameter
+                    
                     print(f"\n diameter : {diameter}")
                     rayon=Decimal(diameter.get())/2
                     centre_x = Decimal(0)
                     centre_y = Decimal(0)
-                    nb_etapes = Decimal(4)
+                    nb_etapes = Decimal(j)
                     angle_step = Decimal(2 * Decimal(math.pi) / nb_etapes)
                     y1=Decimal(0)
                     x1=Decimal(0)
