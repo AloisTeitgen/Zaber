@@ -1120,7 +1120,7 @@ with Connection.open_serial_port("COM8") as connection:
                 if abs(self.PositionAxis1circle-Decimal(PositionAxis1))<0.5 or abs(self.PositionAxis2circle-Decimal(PositionAxis2))<0.5:
                     MovementTime = Decimal(6/2)
                 
-                random_number_step=Decimal(0.9999990000)
+                random_number_step=Decimal(0.05)
                 print(f"\n LoopCircle : {self.LoopCircle}")
                 TimeByStep=(abs(random_number_step)*MovementTime)/(abs(Decimal(PositionAxis1) - self.PositionAxis1circle)+increase)         
                 velocity0= random_number_step/TimeByStep
@@ -1156,18 +1156,19 @@ with Connection.open_serial_port("COM8") as connection:
                 i=1
             
                 while i<=self.LoopCircle and self.Check == 1:
-                    diameter = Decimal(self.Diameter.get)
-                    j=2*((diameter.get()*1000))
+                    diameter = Decimal(self.Diameter.get())
+
+                    j=0
                     
                     
                     x=0
                     y=0
                     
                     print(f"\n diameter : {diameter}")
-                    rayon=Decimal(diameter.get())/2
-                    centre_x = Decimal(0)
+                    rayon=Decimal(diameter/2)
+                    centre_x = Decimal(PositionAxis1)+ rayon
                     centre_y = Decimal(0)
-                    nb_etapes = Decimal(j)
+                    nb_etapes = Decimal(2*((diameter*1000)))
                     angle_step = Decimal(2 * Decimal(math.pi) / nb_etapes)
                     y1=Decimal(0)
                     x1=Decimal(0)
@@ -1184,9 +1185,9 @@ with Connection.open_serial_port("COM8") as connection:
                         # Afficher les coordonnées de cette étape
                         print("Étape", j+1, ": (", x, ",", y, ")")
     
-                        if x<0.000001:
+                        if x<0.001:
                                 x=Decimal(0)
-                        if y<0.000001:
+                        if y<0.0001:
                                 y=Decimal(0)                         
                         if self.Check==2:
                                 self.stop_all_axis()
