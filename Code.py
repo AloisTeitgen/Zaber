@@ -274,14 +274,13 @@ with Connection.open_serial_port("COM8") as connection:
         def MovePlate(self, Movement):
             increase=Decimal(0.000001)
             #Movement=num_entries
-            stop=0
-            j=0
-            while self.Check == 1 and stop==0 and j<500:
+            
+            l=0
+            while self.Check == 1 and l<500:
                 if self.check_var.get() == 0:
-                    stop=1
-                    j=500
+                    l=500
                 self.MovePlate(Movement)
-                j=j+1
+                l=l+1
                 i=0
                 print(f"\n num_entries :: '{Movement}'")
                 for i in range(Movement):
