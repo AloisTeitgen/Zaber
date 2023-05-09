@@ -276,10 +276,9 @@ with Connection.open_serial_port("COM8") as connection:
             #Movement=num_entries
             
             l=0
-            while self.Check == 1 and l<500:
+            while self.Check == 1 and l<50000:
                 if self.check_var.get() == 0:
                     l=500
-                self.MovePlate(Movement)
                 l=l+1
                 i=0
                 print(f"\n num_entries :: '{Movement}'")
@@ -360,9 +359,9 @@ with Connection.open_serial_port("COM8") as connection:
                               
                             elif OldPositionX >= PositionNowAxis1 and OldPositionY < PositionNowAxis2 :
                                 self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 2)
-                            elif OldPositionX < PositionNowAxis1 and OldPositionY >= PositionNowAxis2 :
+                            elif OldPositionX < PositionNowAxis1 and OldPositionY > PositionNowAxis2 :
                                 self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 3)
-                            elif OldPositionX >= PositionNowAxis1 and OldPositionY >= PositionNowAxis2 :    
+                            elif OldPositionX > PositionNowAxis1 and OldPositionY > PositionNowAxis2 :    
                                 self.mouvement_Move_Plate(MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 4)
                                 
                               
