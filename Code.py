@@ -297,7 +297,7 @@ with Connection.open_serial_port("COM8") as connection:
                         if PositionNowAxis2==0:
                             PositionNowAxis2=Decimal(0.00001)
                     elif self.positionAxis2_[i+1].get() =="":
-                        PositionNowAxis2= Decimal(PositionAxis2)
+                        PositionNowAxis2= Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))
                     
                     
                     
