@@ -264,11 +264,11 @@ with Connection.open_serial_port("COM8") as connection:
                 self.MovementTime[i+1].grid(row=j+4, column=k+1)
                 label = ttk.Label(window, text=" ").grid(row=j+5)
                 j=j+6
-            self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda: self.MovePlate(num_entries)).grid(row=21)
+            self.MovomentNow = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda: self.MovePlate(num_entries)).grid(row=21, column=1)
             self.check_var = tk.IntVar()
             self.check_box = tk.Checkbutton(window, text="Loop", variable=self.check_var)
-            self.check_box.grid(row=20)
-            
+            self.check_box.grid(row=20, column=0)
+            label = ttk.Label(window, text=" ").grid(row=22)
             
             
         def MovePlate(self, Movement):
@@ -281,6 +281,9 @@ with Connection.open_serial_port("COM8") as connection:
                     l=500
                 l=l+1
                 i=0
+                if self.Check==2:
+                        self.stop_all_axis()
+                        break
                 print(f"\n num_entries :: '{Movement}'")
                 for i in range(Movement):
                     random_number_step = Decimal(round(random.uniform(0.0010000, 0.0099999), 7))
@@ -295,7 +298,7 @@ with Connection.open_serial_port("COM8") as connection:
                     if self.positionAxis2_[i+1].get() != "":
                         PositionNowAxis2 = Decimal(self.positionAxis2_[i+1].get())
                         if PositionNowAxis2==0:
-                            PositionNowAxis2=Decimal(0.00001)
+                            PositionNowAxis2=Decimal(1)
                     elif self.positionAxis2_[i+1].get() =="":
                         PositionNowAxis2= Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))
                     
@@ -321,7 +324,9 @@ with Connection.open_serial_port("COM8") as connection:
                     elif self.MovementTime[i+1].get() != "":
                         MovementTime = Decimal(self.MovementTime[i+1].get())/2
     
-                    
+                    if self.Check==2:
+                        self.stop_all_axis()
+                        break
     
                     print(f"\nPosition axe 1 vérif :: '{axis1.get_position(Units.LENGTH_MILLIMETRES)}'")
                     print(f"\nPosition axe 2 vérif :: '{axis2.get_position(Units.LENGTH_MILLIMETRES)}'")
@@ -337,9 +342,10 @@ with Connection.open_serial_port("COM8") as connection:
                     
                     random_number_step2 = Decimal((abs(PositionNowAxis2-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))))/(quotient+increase)   )
                                  
-                    quotient2, remainder = divmod(abs(PositionNowAxis2-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))+increase), random_number_step2)
-                    integer_part2 = quotient2-1
-                    decimal_part2 = remainder / random_number_step2              
+                    if random_number_step2 >0.0001:
+                        quotient2, remainder = divmod(abs(PositionNowAxis2-Decimal(axis2.get_position(Units.LENGTH_MILLIMETRES))+increase), random_number_step2)
+                        integer_part2 = quotient2-1
+                        decimal_part2 = remainder / random_number_step2              
                     
                     print(f"\n decimal_part :: '{decimal_part}'") 
                     
@@ -382,12 +388,16 @@ with Connection.open_serial_port("COM8") as connection:
                             elif OldPositionY > PositionNowAxis2 :
                                 self.mouvement_Move_Plate(MovementTime, integer_part2, decimal_part2, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, 8)
                             
-                            
+                        if self.Check==2:
+                            self.stop_all_axis()
+                            break    
                             
                     #print(f"\nPosition axe 1 :: '{number150}'")
                     #print(f"\nPosition axe 2 :: '{number50}'")
                     self.update_labels(axis1.get_position(Units.LENGTH_MILLIMETRES), axis2.get_position(Units.LENGTH_MILLIMETRES))
-    
+                    if self.Check==2:
+                        self.stop_all_axis()
+                        break
                     
         def mouvement_Move_Plate (self, MovementTime, integer_part, decimal_part, random_number_step, random_number_step2, PositionNowAxis1, PositionNowAxis2, velocity0, ConfigureNumber):
             increaseslowly=Decimal(0.000001)
@@ -1073,7 +1083,7 @@ with Connection.open_serial_port("COM8") as connection:
             self.positionAxis2circle = {}
             self.MovementTimecircle = {}
             self.Diameter = {}
-            label = ttk.Label(window, text="Movement linear").grid(row=1, column=1, columnspan=2)
+            label = ttk.Label(window, text="Movement linear + circle").grid(row=1, column=1, columnspan=2)
             label = ttk.Label(window, text="Position Axis1 (in mm) :").grid(row=2, column=1)
             self.PositionAxis1circle = ttk.Entry(window)
             self.PositionAxis1circle.grid(row=2, column=2)
@@ -1100,7 +1110,9 @@ with Connection.open_serial_port("COM8") as connection:
             label = ttk.Label(window, text=" ").grid(row=9, column=1)
             
             
-            
+            #self.check_var_circle = tk.IntVar()
+            #self.check_box_circle = tk.Checkbutton(window, text="Loop", variable=self.check_var_circle)
+            #self.check_box_circle.grid(row=11, column=1) 
             self.ACCEPT_ALL = ttk.Button(window, text="ACCEPT ALL", width=15, command=lambda:self.circleMovement(self.PositionAxis1circle, self.PositionAxis2circle, self.MovementTimecircle, self.Diameter))
             self.ACCEPT_ALL.grid(row=11, column=2) 
 
